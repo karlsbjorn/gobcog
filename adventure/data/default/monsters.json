@@ -204,5 +204,8 @@
     "Wizard": {"hp": 265, "pdef": 1, "mdef": 1.4, "dipl": 230, "image": "https://cdn.pixabay.com/photo/2015/05/18/16/58/abstract-772508_960_720.jpg", "boss": false, "miniboss": {}, "color":""},
     "Wood Spider": {"hp": 69, "pdef": 15, "mdef": 1.15, "dipl": 70, "image": "https://i.stack.imgur.com/S21a4.jpg", "boss": false, "miniboss": {}, "color":""},
     "Wormwing Demon": {"hp": 120, "pdef": 1.1, "mdef": 0.9, "dipl": 180, "image": "http://pngimg.com/uploads/demon/demon_PNG20.png", "boss": false, "miniboss": {}, "color":""},
-    "Ragnaros": {"hp": 350, "pdef": 0.8, "mdef": 1.25, "dipl": 500, "image": "http://cdn.gamer-network.net/2018/metabomb/ragnarosfirefestivalbrawldeckrewardsminirag.jpg", "boss": true, "miniboss": {}, "color":""}
+    "Ragnaros": {"hp": 350, "pdef": 0.8, "mdef": 1.25, "dipl": 700, "image": "http://cdn.gamer-network.net/2018/metabomb/ragnarosfirefestivalbrawldeckrewardsminirag.jpg", "boss": true, "miniboss": {}, "color":""},
+    "Nefarian": {"hp": 400, "pdef": 0.8, "mdef": 1, "dipl": 600, "image": "https://cdnb.artstation.com/p/assets/images/images/015/815/719/large/irun-hiper-.jpg?1549776702", "boss": true, "miniboss": {}, "color":""},
+    "C'thun": {"hp": 450, "pdef": 1, "mdef": 1.1, "dipl": 1000, "image": "https://cdnb.artstation.com/p/assets/images/images/018/142/331/large/jorge-jacinto-c-thun.jpg?1558463390", "boss": true, "miniboss": {}, "color":""},
+    "Kel'Thuzad": {"hp": 500, "pdef": 0.85, "mdef": 1.1, "dipl": 550, "image": "https://psionic-storm.com/wp-content/uploads/kel-thuzad-art.jpg", "boss": true, "miniboss": {}, "color":""}
 }
