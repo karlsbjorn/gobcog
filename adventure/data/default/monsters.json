@@ -203,5 +203,6 @@
     "Wild Stallion": {"hp": 58, "pdef": 1, "mdef": 0.9, "dipl": 50, "image": "https://cdn.pixabay.com/photo/2017/10/31/07/49/horses-2904536_960_720.jpg", "boss": false, "miniboss": {}, "color":""},
     "Wizard": {"hp": 265, "pdef": 1, "mdef": 1.4, "dipl": 230, "image": "https://cdn.pixabay.com/photo/2015/05/18/16/58/abstract-772508_960_720.jpg", "boss": false, "miniboss": {}, "color":""},
     "Wood Spider": {"hp": 69, "pdef": 15, "mdef": 1.15, "dipl": 70, "image": "https://i.stack.imgur.com/S21a4.jpg", "boss": false, "miniboss": {}, "color":""},
-    "Wormwing Demon": {"hp": 120, "pdef": 1.1, "mdef": 0.9, "dipl": 180, "image": "http://pngimg.com/uploads/demon/demon_PNG20.png", "boss": false, "miniboss": {}, "color":""}
+    "Wormwing Demon": {"hp": 120, "pdef": 1.1, "mdef": 0.9, "dipl": 180, "image": "http://pngimg.com/uploads/demon/demon_PNG20.png", "boss": false, "miniboss": {}, "color":""},
+    "Ragnaros": {"hp": 350, "pdef": 0.8, "mdef": 1.25, "dipl": 500, "image": "http://cdn.gamer-network.net/2018/metabomb/ragnarosfirefestivalbrawldeckrewardsminirag.jpg", "boss": true, "miniboss": {}, "color":""}
 }
