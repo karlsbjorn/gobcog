@@ -321,7 +321,7 @@ class LootCommands(AdventureMixin):
                                 "Successfully converted {converted} normal treasure "
                                 "chests to {to} rare treasure chest{plur}.\n{author} "
                                 "now owns {normal} normal, {rare} rare, {epic} epic, "
-                                "{leg} legendary treasure chests, {asc} ascended and {set} set treasure chests."
+                                "{leg} legendary, {asc} ascended and {set} set treasure chests."
                             ).format(
                                 converted=humanize_number(normalcost * amount),
                                 to=humanize_number(1 * amount),
@@ -356,7 +356,7 @@ class LootCommands(AdventureMixin):
                                 "Successfully converted {converted} rare treasure "
                                 "chests to {to} epic treasure chest{plur}. \n{author} "
                                 "now owns {normal} normal, {rare} rare, {epic} epic, "
-                                "{leg} legendary treasure chests, {asc} ascended and {set} set treasure chests."
+                                "{leg} legendary, {asc} ascended and {set} set treasure chests."
                             ).format(
                                 converted=humanize_number(rarecost * amount),
                                 to=humanize_number(1 * amount),
@@ -390,7 +390,7 @@ class LootCommands(AdventureMixin):
                                 "Successfully converted {converted} epic treasure "
                                 "chests to {to} legendary treasure chest{plur}. \n{author} "
                                 "now owns {normal} normal, {rare} rare, {epic} epic, "
-                                "{leg} legendary treasure chests, {asc} ascended and {set} set treasure chests."
+                                "{leg} legendary, {asc} ascended and {set} set treasure chests."
                             ).format(
                                 converted=humanize_number(epiccost * amount),
                                 to=humanize_number(1 * amount),

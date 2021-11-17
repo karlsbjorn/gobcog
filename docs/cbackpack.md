@@ -9,7 +9,7 @@
 **--no-match** - Opposite of `--match`<br />
 **--icase** - If `--match` or `--no-match` and `--icase` are used, matches will not be case sensitive.<br />
 
-######For the following arguments: <br />
+#### For the following arguments: <br />
 - These arguments accept 1 or 2 numbers. If 1 is passed it is treated as an equal match, if 2 then it is a range.<br />
   - **--str**<br />
   - **--int**<br />
