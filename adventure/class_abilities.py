@@ -122,7 +122,7 @@ class ClassAbilities(AdventureMixin):
                     "Use the convoke command when attacking in an adventure."
                 ),
                 "cooldown": time.time(),
-            }
+            },
         }
 
         if clz is None:

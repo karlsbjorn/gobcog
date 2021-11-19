@@ -59,7 +59,7 @@ Use the `[p]insight` command in an adventure.
 * A successful insight into an enemy's weak points during an adventure can turn the tide on difficult encounters.  
 Preferred stat: INT  
 
-**Druids** can unleash nature's raw energy against their foes allowing them to quickly cast a flurry of spells.
+**Druids** can unleash nature's raw energy against their foes allowing them to quickly cast a flurry of spells.  
 Use the `[p]convoke` command when attacking in an adventure.
 * Causes a large amount of Int-based/Magic-based damage.  
 Preferred stat: INT
