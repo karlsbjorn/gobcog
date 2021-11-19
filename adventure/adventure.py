@@ -2529,10 +2529,10 @@ class Adventure(
             usercp = int(cp + max((cp * 0.1 * min(1000, (c._luck + c._att) / 10)), 0))
             userxp = int(userxp * (c.gear_set_bonus.get("xpmult", 1) + daymult + session_bonus))
             usercp = int(usercp * (c.gear_set_bonus.get("cpmult", 1) + daymult))
+            userxp *= 7  # TODO: Make sure this isn't too much
+            usercp *= 7  # TODO: Make sure this isn't too much
             newxp += userxp
             newcp += usercp
-            newxp *= 10  # TODO: Make sure this isn't too much
-            newcp *= 10  # TODO: Make sure this isn't too much
             roll = random.randint(1, 5)
             if c.heroclass.get("pet", {}).get("bonuses", {}).get("always", False):
                 roll = 5

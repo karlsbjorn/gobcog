@@ -166,6 +166,7 @@ class Negaverse(AdventureMixin):
             xp_won = ten_percent if xp_won > ten_percent else xp_won
             xp_won = int(xp_won * (min(max(random.randint(0, character.rebirths), 1), 50) / 100 + 1))
             xp_won = int(xp_won * (character.gear_set_bonus.get("xpmult", 1) + daymult))
+            xp_won /= 7
             if roll == -2:
                 looted = ""
                 curr_balance = character.bal
@@ -248,7 +249,7 @@ class Negaverse(AdventureMixin):
                     lock.release()
                 msg = await self._add_rewards(ctx, ctx.author, xp_won, offering, False)
                 xp_won_final += xp_won
-                xp_won_final /= 10
+
                 offering_value += offering
                 winning_state = True
                 if msg:
