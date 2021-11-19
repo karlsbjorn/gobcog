@@ -1903,6 +1903,7 @@ class Adventure(
                 )
             if session.insight[0] == 1 and user.id != session.insight[1].user.id:
                 attack += int(session.insight[1].total_att * 0.2)
+        magic_users = ("Wizard", "Druid")
         for user in magic_list:
             try:
                 c = await Character.from_json(ctx, self.config, user, self._daily_bonus)
@@ -1931,12 +1932,12 @@ class Adventure(
                     roll = random.randint(roll, max_roll)
             roll_perc = roll / max_roll
             int_value = c.total_int
-            rebirths = c.rebirths * (3 if c.heroclass["name"] == "Wizard" else 1)
+            rebirths = c.rebirths * (3 if c.heroclass["name"] in magic_users else 1)
             if roll_perc < 0.10:
                 msg += _("{}**{}** almost set themselves on fire.\n").format(failed_emoji, escape(user.display_name))
                 fumblelist.append(user)
                 fumble_count += 1
-                if c.heroclass["name"] == "Wizard" and c.heroclass["ability"]:
+                if c.heroclass["name"] in magic_users and c.heroclass["ability"]:
                     bonus_roll = random.randint(5, 15)
                     bonus_multi = random.choice([0.2, 0.3, 0.4, 0.5])
                     bonus = max(bonus_roll, int((roll + int_value + rebirths) * bonus_multi))
@@ -1947,7 +1948,7 @@ class Adventure(
                         f"{self.emojis.magic_crit}{humanize_number(bonus)} + "
                         f"{self.emojis.magic}{str(humanize_number(int_value))}\n"
                     )
-            elif roll_perc > 0.95 or (c.heroclass["name"] == "Wizard"):
+            elif roll_perc > 0.95 or (c.heroclass["name"] in magic_users):
                 crit_str = ""
                 crit_bonus = 0
                 base_bonus = random.randint(5, 10) + rebirths
@@ -1957,7 +1958,7 @@ class Adventure(
                     critlist.append(user)
                     crit_bonus = (random.randint(5, 20)) + (rebirths * 2)
                     crit_str = f"{self.emojis.crit} {humanize_number(crit_bonus)}"
-                if c.heroclass["name"] == "Wizard" and c.heroclass["ability"]:
+                if c.heroclass["name"] in magic_users and c.heroclass["ability"]:
                     base_bonus = (random.randint(1, 10) + 5) * (rebirths // 2)
                     base_str = f"{self.emojis.magic_crit}️ {humanize_number(base_bonus)}"
                 magic += int((roll + base_bonus + crit_bonus + int_value) / mdef)

@@ -113,6 +113,16 @@ class ClassAbilities(AdventureMixin):
                 ),
                 "cooldown": time.time(),
             },
+            "Druid": {
+                "name": _("Druid"),
+                "ability": False,
+                "desc": _(
+                    "Druids can unleash nature's raw energy against their "
+                    "foes allowing them to quickly cast a flurry of spells.\n"
+                    "Use the convoke command when attacking in an adventure."
+                ),
+                "cooldown": time.time(),
+            }
         }
 
         if clz is None:
@@ -122,7 +132,7 @@ class ClassAbilities(AdventureMixin):
                 _(
                     "So you feel like taking on a class, **{author}**?\n"
                     "Available classes are: Tinkerer, Berserker, "
-                    "Wizard, Cleric, Ranger, Psychic and Bard.\n"
+                    "Wizard, Cleric, Ranger, Psychic, Bard and Druid.\n"
                     "Use `{prefix}heroclass name-of-class` to choose one."
                 ).format(author=escape(ctx.author.display_name), prefix=ctx.prefix),
             )
@@ -871,6 +881,58 @@ class ClassAbilities(AdventureMixin):
                     await smart_embed(
                         ctx,
                         _("{skill} **{c}** is focusing all of their energy... {skill}").format(
+                            c=escape(ctx.author.display_name),
+                            skill=self.emojis.skills.wizzard,
+                        ),
+                    )
+                else:
+                    cooldown_time = c.heroclass["cooldown"] - time.time()
+                    return await smart_embed(
+                        ctx,
+                        _(
+                            "Your hero is currently recovering from the "
+                            "last time they used this skill. Try again in {}."
+                        ).format(
+                            humanize_timedelta(seconds=int(cooldown_time)) if int(cooldown_time) >= 1 else _("1 second")
+                        ),
+                    )
+
+    @commands.command()
+    async def convoke(self, ctx: commands.Context):
+        """[Druid Class Only]
+
+        Cast a flurry of spells.
+        """
+        # This is actually the exact same thing as [p]focus, just don't tell anyone.
+        async with self.get_lock(ctx.author):
+            try:
+                c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
+            except Exception as exc:
+                log.exception("Error with the new character sheet", exc_info=exc)
+                return
+            if c.heroclass["name"] != "Druid":
+                ctx.command.reset_cooldown(ctx)
+                return await smart_embed(
+                    ctx,
+                    _("**{}**, you need to be a Druid to do this.").format(escape(ctx.author.display_name)),
+                )
+            else:
+                if c.heroclass["ability"] is True:
+                    return await smart_embed(
+                        ctx,
+                        _("**{}**, ability already in use.").format(escape(ctx.author.display_name)),
+                    )
+                cooldown_time = max(300, (1200 - max((c.luck + c.total_int) * 2, 0)))
+                if "cooldown" not in c.heroclass:
+                    c.heroclass["cooldown"] = cooldown_time + 1
+                if c.heroclass["cooldown"] <= time.time():
+                    c.heroclass["ability"] = True
+                    c.heroclass["cooldown"] = time.time() + cooldown_time
+
+                    await self.config.user(ctx.author).set(await c.to_json(ctx, self.config))
+                    await smart_embed(
+                        ctx,
+                        _("{skill} **{c}** is casting a flurry of spells... {skill}").format(
                             c=escape(ctx.author.display_name),
                             skill=self.emojis.skills.wizzard,
                         ),
