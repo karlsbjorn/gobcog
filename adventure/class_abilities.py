@@ -934,7 +934,7 @@ class ClassAbilities(AdventureMixin):
                         ctx,
                         _("{skill} **{c}** is casting a flurry of spells... {skill}").format(
                             c=escape(ctx.author.display_name),
-                            skill=self.emojis.skills.wizzard,
+                            skill=self.emojis.skills.druid,
                         ),
                     )
                 else:
