@@ -2531,6 +2531,8 @@ class Adventure(
             usercp = int(usercp * (c.gear_set_bonus.get("cpmult", 1) + daymult))
             newxp += userxp
             newcp += usercp
+            newxp *= 10  # TODO: Make sure this isn't too much
+            newcp *= 10  # TODO: Make sure this isn't too much
             roll = random.randint(1, 5)
             if c.heroclass.get("pet", {}).get("bonuses", {}).get("always", False):
                 roll = 5
@@ -2538,12 +2540,10 @@ class Adventure(
                 petxp = int(userxp * c.heroclass["pet"]["bonus"])
                 newxp += petxp
                 userxp += petxp
-                userxp *= 10  # TODO: Make sure this isn't too much
                 self._rewards[user.id]["xp"] = userxp
                 petcp = int(usercp * c.heroclass["pet"]["bonus"])
                 newcp += petcp
                 usercp += petcp
-                usercp *= 10  # TODO: Make sure this isn't too much
                 self._rewards[user.id]["cp"] = usercp
                 reward_message += "{mention} gained {xp} XP and {coin} {currency}.\n".format(
                     mention=user.mention if can_embed else f"**{user.display_name}**",
