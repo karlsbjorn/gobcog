@@ -301,7 +301,7 @@ class ClassAbilities(AdventureMixin):
                         if c.skill["pool"] < 0:
                             c.skill["pool"] = 0
                         c.heroclass = classes[clz]
-                        if c.heroclass["name"] in ["Wizard", "Cleric"]:
+                        if c.heroclass["name"] in ["Wizard", "Cleric", "Druid"]:
                             c.heroclass["cooldown"] = (
                                 max(300, (1200 - max((c.luck + c.total_int) * 2, 0))) + time.time()
                             )
