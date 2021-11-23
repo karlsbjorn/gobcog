@@ -12,7 +12,7 @@ To start an adventure, use `[p]adventure` or `[p]a`. Reactions will appear under
 
 ## Hero/Heroclass
 
-Classes can be chosen at level 10 by using `[p]heroclass`. Available classes are Tinkerer, Berserker, Wizard, Cleric, Ranger and Bard. A prestige class called Psychic is available at Rebirth level 20 (more on the rebirthing system below).  
+Classes can be chosen at level 10 by using `[p]heroclass`. Available classes are Tinkerer, Berserker, Wizard, Cleric, Ranger, Bard and Druid. A prestige class called Psychic is available at Rebirth level 20 (more on the rebirthing system below).  
   
 Main Stats: Attack (ATT/ATK), Charisma/Diplomacy (CHA/DIPL), Intelligence (INT)  
 Minor Stats: Dexterity (DEX), Luck (LUCK/LUK)  
@@ -61,7 +61,7 @@ Preferred stat: INT
 
 **Druids** can unleash nature's raw energy against their foes allowing them to quickly cast a flurry of spells.  
 Use the `[p]convoke` command when attacking in an adventure.
-* Causes a large amount of Int-based/Magic-based damage.  
+* Causes a random amount of Int-based/Magic-based damage.  
 Preferred stat: INT
 
 

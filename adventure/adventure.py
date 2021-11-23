@@ -1960,7 +1960,11 @@ class Adventure(
                     crit_bonus = (random.randint(5, 20)) + (rebirths * 2)
                     crit_str = f"{self.emojis.crit} {humanize_number(crit_bonus)}"
                 if c.heroclass["name"] in magic_users and c.heroclass["ability"]:
-                    base_bonus = (random.randint(1, 10) + 5) * (rebirths // 2)
+                    # Druid damage bonus relies a lot more on luck, but can potentially be bigger than a wizard's
+                    if c.heroclass["name"] == "Druid":
+                        base_bonus = (random.randint(1, 25)) * (rebirths // 2)
+                    else:
+                        base_bonus = (random.randint(4, 7) + 5) * (rebirths // 2)
                     base_str = f"{self.emojis.magic_crit}️ {humanize_number(base_bonus)}"
                 magic += int((roll + base_bonus + crit_bonus + int_value) / mdef)
                 bonus = base_str + crit_str
