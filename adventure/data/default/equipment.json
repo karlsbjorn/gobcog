@@ -172,6 +172,11 @@
       "dex": -2,
       "int": 2,
       "luck": 2
+    },
+    "Pistol": {
+      "att": 2,
+      "int": 1,
+      "luck": 1
     }
   },
   "legs": {
@@ -240,6 +245,11 @@
     },
     "Sword": {
       "att": 2
+    },
+    "Pistol": {
+      "att": 2,
+      "int": 1,
+      "luck": 1
     }
   },
   "ring": {
@@ -281,6 +291,25 @@
     "Warhammer": {
       "att": 5,
       "dex": -2
+    },
+    "Blunderbuss": {
+      "att": 3,
+      "dex": -1
+    },
+    "Arquebus": {
+      "att": 3,
+      "cha": 2
+    },
+    "Caliver": {
+      "att": 4,
+      "dex": 1,
+      "luck": 2
+    },
+    "Musket": {
+      "att": 5,
+      "cha": 1,
+      "dex": 1,
+      "luck": 2
     }
   }
 }
