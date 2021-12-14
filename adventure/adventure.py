@@ -549,7 +549,7 @@ class Adventure(
             # Only let the bot owner specify a specific challenge
             challenge = None
 
-        adventure_msg = _("Osjećaš se avanturistički, **{}**?").format(escape(ctx.author.display_name))
+        adventure_msg = _("You feel adventurous, **{}**?").format(escape(ctx.author.display_name))
         try:
             reward, participants = await self._simple(ctx, adventure_msg, challenge)
             await self.config.guild(ctx.guild).cooldown.set(time.time())
@@ -898,37 +898,37 @@ class Adventure(
         easy_mode = session.easy_mode
         if easy_mode:
             dragon_text = _(
-                "ali **a{attr} {chall}** "
-                "je upravo sletio pred tobom! \n\n"
-                "Što ćeš učiniti i hoće li drugi heroji biti dovoljno hrabri da ti pomognu?\n"
-                "Heroji imaju 5 minuta za sudjelovanje putem reakcije: "
-                "\n\nReagiraj s: {reactions}"
+                "but **a{attr} {chall}** "
+                "just landed in front of you glaring! \n\n"
+                "What will you do and will other heroes be brave enough to help you?\n"
+                "Heroes have 5 minutes to participate via reaction:"
+                "\n\nReact with: {reactions}"
             ).format(
                 attr=session.attribute,
                 chall=session.challenge,
-                reactions=_("**Borba** - **Čarolija** - **Razgovor** - **Molitva** - **Pobjegni**"),
+                reactions=_("**Fight** - **Spell** - **Talk** - **Pray** - **Run**"),
             )
             basilisk_text = _(
-                "ali **a{attr} {chall}** je izašao gledajući oko sebe. \n\n"
-                "Što ćeš učiniti i hoće li ti drugi heroji pomoći?\n"
-                "Heroji imaju 3 minute za sudjelovanje putem reakcije:"
-                "\n\nReagiraj s: {reactions}"
+                "but **a{attr} {chall}** stepped out looking around. \n\n"
+                "What will you do and will other heroes help your cause?\n"
+                "Heroes have 3 minutes to participate via reaction:"
+                "\n\nReact with: {reactions}"
             ).format(
                 attr=session.attribute,
                 chall=session.challenge,
-                reactions=_("**Borba** - **Čarolija** - **Razgovor** - **Molitva** - **Pobjegni**"),
+                reactions=_("**Fight** - **Spell** - **Talk** - **Pray** - **Run**"),
             )
             normal_text = _(
-                "ali **a{attr} {chall}** "
-                "ga čuva. \n\n"
-                "Što ćeš učiniti i hoće li ti drugi heroji pomoći?\n"
-                "Heroji imaju 2 minute za sudjelovanje putem reakcije:"
-                "\n\nReagiraj s: {reactions}"
+                "but **a{attr} {chall}** "
+                "is guarding it with{threat}. \n\n"
+                "What will you do and will other heroes help your cause?\n"
+                "Heroes have 2 minutes to participate via reaction:"
+                "\n\nReact with: {reactions}"
             ).format(
                 attr=session.attribute,
                 chall=session.challenge,
-                # threat=random.choice(self.THREATEE),   # This doesn't really work
-                reactions=_("**Borba** - **Čarolija** - **Razgovor** - **Molitva** - **Pobjegni**"),
+                threat=random.choice(self.THREATEE),
+                reactions=_("**Fight** - **Spell** - **Talk** - **Pray** - **Run**"),
             )
 
             embed = discord.Embed(colour=discord.Colour.blurple())
@@ -968,11 +968,11 @@ class Adventure(
             use_embeds = await self.config.guild(ctx.guild).embed() and ctx.channel.permissions_for(ctx.me).embed_links
             timeout = 60 * 3
             obscured_text = _(
-                "Što ćeš učiniti i hoće li ti drugi heroji pomoći?\n"
-                "Heroji imaju {time} za sudjelovanje putem reakcije:"
-                "\n\nReagiraj s: {reactions}"
+                "What will you do and will other heroes help your cause?\n"
+                "Heroes have {time} minutes to participate via reaction:"
+                "\n\nReact with: {reactions}"
             ).format(
-                reactions=_("**Borba** - **Čarolija** - **Razgovor** - **Molitva** - **Pobjegni**"),
+                reactions=_("**Fight** - **Spell** - **Talk** - **Pray** - **Run**"),
                 time=timeout // 60,
             )
             if use_embeds:
@@ -1084,12 +1084,13 @@ class Adventure(
                 with contextlib.suppress(discord.HTTPException):
                     await user.send(
                         _(
-                            "Razmišljaš o odlasku u avanturu s prijateljima, pa "
-                            "odete u svoju banku po nešto novca za pripremu i oni "
-                            "ti kažu da ti je račun prazan!\n"
-                            "Trčiš kući tražiti rezervne novčiće, a ne možeš "
-                            "pronaći niti jedan, pa kažeš prijateljima da im se ne "
-                            "možeš pridružiti jer već imaš planove... jer ti je previše neugodno!"
+                            "You contemplate going on an adventure with your friends, so "
+                            "you go to your bank to get some money to prepare and they "
+                            "tell you that your bank is empty!\n"
+                            "You run home to look for some spare coins and you can't "
+                            "even find a single one, so you tell your friends that you can't "
+                            "join them as you already have plans... as you are too embarrassed "
+                            "to tell them you are broke!"
                         )
                     )
                 return
@@ -1162,16 +1163,16 @@ class Adventure(
         for user in pray_list:
             pray_name_list.append(f"**{escape(user.display_name)}**")
 
-        fighters_final_string = _(" i ").join(
+        fighters_final_string = _(" and ").join(
             [", ".join(fight_name_list[:-1]), fight_name_list[-1]] if len(fight_name_list) > 2 else fight_name_list
         )
-        wizards_final_string = _(" i ").join(
+        wizards_final_string = _(" and ").join(
             [", ".join(wizard_name_list[:-1]), wizard_name_list[-1]] if len(wizard_name_list) > 2 else wizard_name_list
         )
-        talkers_final_string = _(" i ").join(
+        talkers_final_string = _(" and ").join(
             [", ".join(talk_name_list[:-1]), talk_name_list[-1]] if len(talk_name_list) > 2 else talk_name_list
         )
-        preachermen_final_string = _(" i ").join(
+        preachermen_final_string = _(" and ").join(
             [", ".join(pray_name_list[:-1]), pray_name_list[-1]] if len(pray_name_list) > 2 else pray_name_list
         )
         if session.no_monster:
@@ -1265,17 +1266,17 @@ class Adventure(
         damage_str = ""
         diplo_str = ""
         if dmg_dealt > 0:
-            damage_str = _("Grupa je {status} **{challenge}** **({result}/{int_hp})**.\n").format(
-                status=_("udarila") if failed or not slain else _("ubila"),
+            damage_str = _("The group {status} **{challenge}** **({result}/{int_hp})**.\n").format(
+                status=_("hit the") if failed or not slain else _("killed the"),
                 challenge=challenge,
                 result=humanize_number(dmg_dealt),
                 int_hp=humanize_number(hp),
             )
         if diplomacy > 0:
-            diplo_str = _("Grupa je {status} **{challenge}** {how} **({diplomacy}/{int_dipl})**.\n").format(
-                status=_("pokušala nagovoriti") if not persuaded else _("zbunila"),
+            diplo_str = _("The group {status} the **{challenge}** with {how} **({diplomacy}/{int_dipl})**.\n").format(
+                status=_("tried to persuade") if not persuaded else _("distracted"),
                 challenge=challenge,
-                how=_("laskanjem") if failed or not persuaded else _("uvrijedama"),
+                how=_("flattery") if failed or not persuaded else _("insults"),
                 diplomacy=humanize_number(diplomacy),
                 int_dipl=humanize_number(dipl),
             )
@@ -1495,7 +1496,7 @@ class Adventure(
                 for (user, loss) in repair_list:
                     if user not in temp_repair:
                         loss_list.append(
-                            _("\n{user} je iskoristio {loss} {currency_name}").format(
+                            _("\n{user} used {loss} {currency_name}").format(
                                 user=user.mention,
                                 loss=humanize_number(loss),
                                 currency_name=currency_name,
@@ -1528,7 +1529,7 @@ class Adventure(
                 )
 
             if persuaded:
-                text = _("{b_talkers} je umalo poginuo u borbi, ali je u posljednjoj sekundi zbunio {chall}.").format(
+                text = _("{b_talkers} almost died in battle, but confounded the {chall} in the last second.").format(
                     b_talkers=talkers_final_string, chall=session.challenge
                 )
                 text += await self._reward(
