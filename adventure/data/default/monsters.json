@@ -216,5 +216,10 @@
     "Devilsaur": {"hp": 232, "pdef": 1.15, "mdef": 0.9, "dipl": 260, "image": "https://i.imgur.com/XMlBwH1.jpg", "boss": false, "miniboss": {}, "color":""},
     "Fel Reaver": {"hp": 314, "pdef": 1.5, "mdef": 0.8, "dipl": 380, "image": "https://i.imgur.com/FPoScMp.jpg", "boss": false, "miniboss": {}, "color":""},
     "Raptor": {"hp": 27, "pdef": 1.15, "mdef": 0.9, "dipl": 35, "image": "https://mocah.org/uploads/posts/826424-Raptor-Form-Hearthstone-Heroes-of-Warcraft-Dinosaurs.jpg", "boss": false, "miniboss": {}, "color":""},
-    "Timberling": {"hp": 26, "pdef": 1.1, "mdef": 1, "dipl": 34, "image": "https://static.wikia.nocookie.net/wowpedia/images/8/88/Timberling.png/revision/latest/scale-to-width-down/2000?cb=20180603173553", "boss": false, "miniboss": {}, "color":""}
+    "Timberling": {"hp": 26, "pdef": 1.1, "mdef": 1, "dipl": 34, "image": "https://static.wikia.nocookie.net/wowpedia/images/8/88/Timberling.png/revision/latest/scale-to-width-down/2000?cb=20180603173553", "boss": false, "miniboss": {}, "color":""},
+    "Dust Devil": {"hp": 44, "pdef": 1.2, "mdef": 1, "dipl": 55, "image": "https://static.wikia.nocookie.net/wowpedia/images/a/a1/Tempest_Elemental_tcg.jpg/revision/latest/scale-to-width-down/808?cb=20210602210052", "boss": false, "miniboss": {}, "color":""},
+    "Dragonhawk": {"hp": 67, "pdef": 1, "mdef": 1.1, "dipl": 80, "image": "https://i.pinimg.com/originals/2c/38/a3/2c38a31ca08a48c5face37f6c50b59d1.jpg", "boss": false, "miniboss": {}, "color":""},
+    "Young Dragonhawk": {"hp": 22, "pdef": 1, "mdef": 1, "dipl": 26, "image": "https://static.wikia.nocookie.net/hearthstone_gamepedia/images/7/78/Young_Dragonhawk_full.png/revision/latest/scale-to-width-down/960?cb=20150817205322", "boss": false, "miniboss": {}, "color":""},
+    "Zoatroid": {"hp": 63, "pdef": 1, "mdef": 1, "dipl": 126, "image": "https://i.imgur.com/GQ8BIdg.jpg", "boss": false, "miniboss": {}, "color":""},
+    "Fleshbeast": {"hp": 36, "pdef": 1.2, "mdef": 0.8, "dipl": 50, "image": "https://static.wikia.nocookie.net/wowpedia/images/0/09/Fleshbeast_Art.jpg/revision/latest/scale-to-width-down/800?cb=20180817221016", "boss": false, "miniboss": {}, "color":""}
 }
