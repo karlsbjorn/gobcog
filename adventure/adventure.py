@@ -187,6 +187,7 @@ class Adventure(
         self.MONSTER_NOW: dict = None
         self.LOCATIONS: list = None
         self.PETS: dict = None
+        self.ACTION_RESPONSE: dict = None
 
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
@@ -232,6 +233,7 @@ class Adventure(
             equipment_fp = get_path(self) / f"{theme}" / "equipment.json"
             suffixes_fp = get_path(self) / f"{theme}" / "suffixes.json"
             set_bonuses = get_path(self) / f"{theme}" / "set_bonuses.json"
+            action_response = get_path(self) / f"{theme}" / "action_response.json"
             files = {
                 "pets": pets_fp,
                 "attr": attribs_fp,
@@ -246,6 +248,7 @@ class Adventure(
                 "equipment": equipment_fp,
                 "suffixes": suffixes_fp,
                 "set_bonuses": set_bonuses,
+                "action_response": action_response,
             }
             for (name, file) in files.items():
                 if not file.exists():
@@ -277,6 +280,8 @@ class Adventure(
                 self.SUFFIXES = json.load(f)
             with files["set_bonuses"].open("r") as f:
                 self.SET_BONUSES = json.load(f)
+            with files["action_response"].open("r") as f:
+                self.ACTION_RESPONSE = json.load(f)
 
             if not all(
                 i
@@ -536,11 +541,11 @@ class Adventure(
         cooldown_time = guild_settings["cooldown_timer_manual"]
 
         if cooldown + cooldown_time > time.time():
-            cooldown_time = cooldown + cooldown_time - time.time()
+            cooldown_time = int(cooldown + cooldown_time)
             return await smart_embed(
                 ctx,
-                _("No heroes are ready to depart in an adventure, try again in {}.").format(
-                    humanize_timedelta(seconds=int(cooldown_time)) if int(cooldown_time) >= 1 else _("1 second")
+                _("No heroes are ready to depart in an adventure, try again <t:{}:R>.").format(
+                    cooldown_time
                 ),
             )
 
@@ -866,6 +871,7 @@ class Adventure(
             no_monster = random.randint(0, 100) == 25
         self._sessions[ctx.guild.id] = GameSession(
             ctx=ctx,
+            cog=self,
             challenge=new_challenge if not no_monster else None,
             attribute=attribute if not no_monster else None,
             guild=ctx.guild,
@@ -938,9 +944,9 @@ class Adventure(
                     embed.colour = discord.Colour.dark_red()
                     if session.monster["image"]:
                         embed.set_image(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{dragon_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{dragon_text}", view=session)
                 timeout = 60 * 5
 
             elif session.miniboss:
@@ -949,18 +955,18 @@ class Adventure(
                     embed.colour = discord.Colour.dark_green()
                     if session.monster["image"]:
                         embed.set_image(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{basilisk_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{basilisk_text}", view=session)
                 timeout = 60 * 3
             else:
                 if use_embeds:
                     embed.description = f"{adventure_msg}\n{normal_text}"
                     if session.monster["image"]:
                         embed.set_thumbnail(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{normal_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{normal_text}", view=session)
                 timeout = 60 * 2
         else:
             embed = discord.Embed(colour=discord.Colour.blurple())
@@ -976,13 +982,13 @@ class Adventure(
             )
             if use_embeds:
                 embed.description = f"{adventure_msg}\n{obscured_text}"
-                adventure_msg = await ctx.send(embed=embed)
+                adventure_msg = await ctx.send(embed=embed, view=session)
             else:
-                adventure_msg = await ctx.send(f"{adventure_msg}\n{obscured_text}")
+                adventure_msg = await ctx.send(f"{adventure_msg}\n{obscured_text}", view=session)
 
         session.message_id = adventure_msg.id
         session.message = adventure_msg
-        start_adding_reactions(adventure_msg, self._adventure_actions)
+        # start_adding_reactions(adventure_msg, self._adventure_actions)
         timer = await self._adv_countdown(ctx, session.timer, "Time remaining")
         self.tasks[adventure_msg.id] = timer
         try:
@@ -992,6 +998,7 @@ class Adventure(
         except Exception as exc:
             timer.cancel()
             log.exception("Error with the countdown timer", exc_info=exc)
+        await adventure_msg.edit(view=None)
 
         return await self._result(ctx, adventure_msg)
 
