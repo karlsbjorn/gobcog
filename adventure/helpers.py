@@ -42,7 +42,10 @@ async def smart_embed(ctx, message, success=None, image=None, ephemeral=False, c
             elif success is False:
                 colour = discord.Colour.dark_red()
             else:
-                colour = await ctx.embed_colour()
+                if is_slash:
+                    colour = await cog.bot.get_embed_colour(ctx.channel)
+                else:
+                    colour = await ctx.embed_colour()
             embed = discord.Embed(description=message, color=colour)
             if image:
                 embed.set_thumbnail(url=image)
