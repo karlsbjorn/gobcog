@@ -25,13 +25,18 @@ def escape(t: str) -> str:
     return _escape(filter_various_mentions(t), mass_mentions=True, formatting=True)
 
 
-async def smart_embed(ctx, message, success=None, image=None):
+async def smart_embed(ctx, message, success=None, image=None, ephemeral=False, cog=None):
+    is_slash = False
+    if isinstance(ctx, discord.Interaction):
+        is_slash = True
+    if cog is None:
+        cog = ctx.cog
     if ctx.guild:
-        use_embeds = await ctx.cog.config.guild(ctx.guild).embed()
+        use_embeds = await cog.config.guild(ctx.guild).embed()
     else:
         use_embeds = True
     if use_embeds:
-        if await ctx.embed_requested():
+        if is_slash or await ctx.embed_requested():
             if success is True:
                 colour = discord.Colour.dark_green()
             elif success is False:
@@ -41,10 +46,30 @@ async def smart_embed(ctx, message, success=None, image=None):
             embed = discord.Embed(description=message, color=colour)
             if image:
                 embed.set_thumbnail(url=image)
-            return await ctx.send(embed=embed)
+            if is_slash:
+                if ctx.response.is_done():
+                    await ctx.followup.send(embed=embed, ephemeral=ephemeral)
+                else:
+                    await ctx.response.send_message(embed=embed, ephemeral=ephemeral)
+            else:
+                await ctx.send(embed=embed)
+            return
         else:
-            return await ctx.send(message)
-    return await ctx.send(message)
+            if is_slash:
+                if ctx.response.is_done():
+                    await ctx.followup.send(message, ephemeral=ephemeral)
+                else:
+                    await ctx.response.send_message(message, ephemeral=ephemeral)
+            else:
+                await ctx.send(message)
+            return
+    if is_slash:
+        if ctx.response.is_done():
+            await ctx.followup.send(message, ephemeral=ephemeral)
+        else:
+            await ctx.response.send_message(message, ephemeral=ephemeral)
+    else:
+        await ctx.send(message)
 
 
 def check_running_adventure(ctx):
