@@ -6,7 +6,7 @@
     "cleric": ["You flail your $weapon at the $monster."],
     "ranger": ["You flail your $weapon at the $monster."],
     "psychic": ["You flail your $weapon at the $monster."],
-    "default": ["You flail your $weapon at the $monster."],
+    "hero": ["You flail your $weapon at the $monster."],
     "wizard": ["You flail your $weapon at the $monster."]
   },
   "magic": {
@@ -16,7 +16,7 @@
     "cleric": ["You cast a spell at the $monster."],
     "ranger": ["You cast a spell at the $monster."],
     "psychic": ["You cast a spell at the $monster."],
-    "default": ["You cast a spell at the $monster."],
+    "hero": ["You cast a spell at the $monster."],
     "wizard": ["You cast a spell at the $monster."]
   },
   "talk": {
@@ -26,7 +26,7 @@
     "cleric": ["You tell stories about $monster kind."],
     "ranger": ["You tell stories about $monster kind."],
     "psychic": ["You tell stories about $monster kind."],
-    "default": ["You tell stories about $monster kind."],
+    "hero": ["You tell stories about $monster kind."],
     "wizard": ["You tell stories about $monster kind."]
   },
   "pray": {
@@ -36,7 +36,7 @@
     "cleric": ["You pray to $god for help against the $monster."],
     "ranger": ["You pray to $god for help against the $monster."],
     "psychic": ["You pray to $god for help against the $monster."],
-    "default": ["You pray to $god for help against the $monster."],
+    "hero": ["You pray to $god for help against the $monster."],
     "wizard": ["You pray to $god for help against the $monster."]
   },
   "run": {
@@ -46,7 +46,7 @@
     "cleric": ["You run away from $monster."],
     "ranger": ["You run away from $monster."],
     "psychic": ["You run away from $monster."],
-    "default": ["You run away from $monster."],
+    "hero": ["You run away from $monster."],
     "wizard": ["You run away from $monster."]
   }
 }
