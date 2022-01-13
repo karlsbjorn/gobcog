@@ -17,7 +17,7 @@ Classes can be chosen at level 10 by using `[p]heroclass`. Available classes are
 Main Stats: Attack (ATT/ATK), Charisma/Diplomacy (CHA/DIPL), Intelligence (INT)  
 Minor Stats: Dexterity (DEX), Luck (LUCK/LUK)  
   
-While each class has a main stat that benefits them more than others, Dexterity and Luck benefit every class. Dexterity can lessen your repair bills after a failed adventure and help your hero get critical hits, while luck can benefit the outcome of special attacks, reduce cooldown times, augment critical strikes, affect loot chest outcomes and the reduce the price of items.  
+While each class has a main stat that benefits them more than others, Dexterity and Luck benefit every class. Dexterity can lessen your repair bills after a failed adventure and help your hero get critical hits, while luck can benefit the outcome of special attacks, reduce cooldown times, augment critical strikes, affect loot chest outcomes, and reduce the price of items.  
   
 **Tinkerers** can forge two different items into a device bound to their very soul.  
 Special ability: Use the `[p]forge` command.  

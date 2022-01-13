@@ -119,7 +119,7 @@ class LoadoutCommands(AdventureMixin):
             for (l_name, loadout) in c.loadouts.items():
                 if name and name.lower() == l_name:
                     index = count
-                stats = await self._build_loadout_display({"items": loadout}, rebirths=c.rebirths, index=count + 1)
+                stats = await self._build_loadout_display(ctx, {"items": loadout}, rebirths=c.rebirths, index=count + 1)
                 msg = _("{name} Loadout for {author}\n\n{stats}").format(
                     name=l_name, author=escape(ctx.author.display_name), stats=stats
                 )
