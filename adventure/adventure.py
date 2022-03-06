@@ -521,13 +521,13 @@ class Adventure(
                 ctx.guild,
             )
             extra = (
-                _("\nRun `{ctx.clean_prefix}apayday` to get some gold.").format(ctx=ctx)
+                _("\nPokreni `{ctx.clean_prefix}apayday` kako bi dobio malo {name}").format(ctx=ctx, name=currency_name)
                 if self._separate_economy
                 else ""
             )
             return await smart_embed(
                 ctx,
-                _("You need {req} {name} to start an adventure.{extra}").format(
+                _("Trebaš imati {req} {name} kako bi pokrenuo avanturu.{extra}").format(
                     req=250, name=currency_name, extra=extra
                 ),
             )
@@ -540,8 +540,8 @@ class Adventure(
             cooldown_time = cooldown + cooldown_time - time.time()
             return await smart_embed(
                 ctx,
-                _("No heroes are ready to depart in an adventure, try again in {}.").format(
-                    humanize_timedelta(seconds=int(cooldown_time)) if int(cooldown_time) >= 1 else _("1 second")
+                _("Nijedan heroj nije spreman krenuti u avanturu, pokušaj ponovno za {}.").format(
+                    humanize_timedelta(seconds=int(cooldown_time)) if int(cooldown_time) >= 1 else _("1 sekundu")
                 ),
             )
 
@@ -605,7 +605,7 @@ class Adventure(
         if ctx.message.id in self._loss_message:
             extramsg = self._loss_message.pop(ctx.message.id)
             if extramsg:
-                extramsg = _(f"{extramsg} to repair their gear.")
+                extramsg = _(f"{extramsg} za popravak svoje opreme.")
                 for msg in pagify(extramsg, page_length=1900):
                     await smart_embed(ctx, msg, success=False)
         while ctx.guild.id in self._sessions:
@@ -648,7 +648,7 @@ class Adventure(
             await ctx.send(msg)
         elif isinstance(error, discord.NotFound):
             handled = True
-            msg = _("An important message has been deleted, please try again.").format(
+            msg = _("Važna poruka je izbrisana, pokušajte ponovo.").format(
                 message=error.message,
                 command=error.cmd,
             )
@@ -984,7 +984,7 @@ class Adventure(
         session.message_id = adventure_msg.id
         session.message = adventure_msg
         start_adding_reactions(adventure_msg, self._adventure_actions)
-        timer = await self._adv_countdown(ctx, session.timer, "Time remaining")
+        timer = await self._adv_countdown(ctx, session.timer, "Preostalo vrijeme")
         self.tasks[adventure_msg.id] = timer
         try:
             await asyncio.wait_for(timer, timeout=timeout + 5)
@@ -1084,13 +1084,12 @@ class Adventure(
                 with contextlib.suppress(discord.HTTPException):
                     await user.send(
                         _(
-                            "You contemplate going on an adventure with your friends, so "
-                            "you go to your bank to get some money to prepare and they "
-                            "tell you that your bank is empty!\n"
-                            "You run home to look for some spare coins and you can't "
-                            "even find a single one, so you tell your friends that you can't "
-                            "join them as you already have plans... as you are too embarrassed "
-                            "to tell them you are broke!"
+                            "Razmišljaš o odlasku u avanturu s prijateljima, pa "
+                            "odeš u banku po nešto novca za pripremu no oni "
+                            "ti kažu da ti je račun prazan!\n"
+                            "Trčiš kući tražiti rezervne novčiće, a ne možeš "
+                            "pronaći niti jedan, te kažeš prijateljima da im se ne "
+                            "možeš pridružiti jer već imaš planove..."
                         )
                     )
                 return
@@ -1113,8 +1112,8 @@ class Adventure(
                     if user_id not in self._react_messaged:
                         await reaction.message.channel.send(
                             _(
-                                "**{c}**, you are already in an existing adventure. "
-                                "Wait for it to finish before joining another one."
+                                "**{c}**, već si u postojećoj avanturi. "
+                                "Pričekaj da završi prije nego što se pridružiš još jednoj."
                             ).format(c=escape(user.display_name))
                         )
                         self._react_messaged.append(user_id)
@@ -1126,7 +1125,7 @@ class Adventure(
     async def _result(self, ctx: commands.Context, message: discord.Message):
         if ctx.guild.id not in self._sessions:
             return
-        calc_msg = await ctx.send(_("Calculating..."))
+        calc_msg = await ctx.send(_("Računanje..."))
         attack = 0
         diplomacy = 0
         magic = 0
@@ -1452,7 +1451,7 @@ class Adventure(
                 for (user, loss) in repair_list:
                     if user not in temp_repair:
                         loss_list.append(
-                            _("\n{user} used {loss} {currency_name}").format(
+                            _("\n{user} je iskoristio {loss} {currency_name}").format(
                                 user=user.mention,
                                 loss=humanize_number(loss),
                                 currency_name=currency_name,
@@ -1574,7 +1573,7 @@ class Adventure(
                     for (user, loss) in repair_list:
                         if user not in temp_repair:
                             loss_list.append(
-                                _("\n{user} used {loss} {currency_name}").format(
+                                _("\n{user} je iskoristio {loss} {currency_name}").format(
                                     user=user.mention,
                                     loss=humanize_number(loss),
                                     currency_name=currency_name,
@@ -1752,7 +1751,7 @@ class Adventure(
             for (user, loss) in repair_list:
                 if user not in temp_repair:
                     loss_list.append(
-                        _("\n{user} used {loss} {currency_name}").format(
+                        _("\n{user} je iskoristio {loss} {currency_name}").format(
                             user=user.mention,
                             loss=humanize_number(loss),
                             currency_name=currency_name,
@@ -2312,8 +2311,9 @@ class Adventure(
                     c.skill["pool"] = 0
                 c.skill["pool"] += ending_points - starting_points
                 if c.skill["pool"] > 0:
-                    extra = _(" You have **{}** skill points available.").format(c.skill["pool"])
-                rebirth_text = _("{} {} is now level **{}**!{}\n{}").format(
+                    extra = _(" Dostupan ti je **{}** skill point." if c.skill["pool"] == 1 else
+                              " Dostupno ti je **{}** skill pointa.").format(c.skill["pool"])
+                rebirth_text = _("{} {} je sada level **{}**!{}\n{}").format(
                     levelup_emoji, user.mention, lvl_end, extra, rebirthextra
                 )
             if c.rebirths > 1:
@@ -2549,21 +2549,21 @@ class Adventure(
                 newcp += petcp
                 usercp += petcp
                 self._rewards[user.id]["cp"] = usercp
-                reward_message += "{mention} gained {xp} XP and {coin} {currency}.\n".format(
+                reward_message += "{mention} je dobio {xp} XP-a i {coin} {currency}.\n".format(
                     mention=user.mention if can_embed else f"**{user.display_name}**",
                     xp=humanize_number(int(userxp)),
                     coin=humanize_number(int(usercp)),
                     currency=currency_name,
                 )
                 percent = round((c.heroclass["pet"]["bonus"] - 1.0) * 100)
-                phrase += _("\n**{user}** received a **{percent}%** reward bonus from their {pet_name}.").format(
+                phrase += _("\n**{user}** je dobio **{percent}%** nagradnog bonusa od svog {pet_name}.").format(
                     user=escape(user.display_name),
                     percent=str(percent),
                     pet_name=c.heroclass["pet"]["name"],
                 )
 
             else:
-                reward_message += "{mention} gained {xp} XP and {coin} {currency}.\n".format(
+                reward_message += "{mention} je dobio {xp} XP-a i {coin} {currency}.\n".format(
                     mention=user.mention,
                     xp=humanize_number(int(userxp)),
                     coin=humanize_number(int(usercp)),
