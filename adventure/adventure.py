@@ -2311,8 +2311,11 @@ class Adventure(
                     c.skill["pool"] = 0
                 c.skill["pool"] += ending_points - starting_points
                 if c.skill["pool"] > 0:
-                    extra = _(" Dostupan ti je **{}** skill point." if c.skill["pool"] == 1 else
-                              " Dostupno ti je **{}** skill pointa.").format(c.skill["pool"])
+                    extra = _(
+                        " Dostupan ti je **{}** skill point."
+                        if c.skill["pool"] == 1
+                        else " Dostupno ti je **{}** skill pointa."
+                    ).format(c.skill["pool"])
                 rebirth_text = _("{} {} je sada level **{}**!{}\n{}").format(
                     levelup_emoji, user.mention, lvl_end, extra, rebirthextra
                 )
