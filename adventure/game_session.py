@@ -515,7 +515,7 @@ class SpecialActionButton(discord.ui.Button):
             c.heroclass["ability"] = True
             c.heroclass["cooldown"] = time.time()
             async with self.view.cog.get_lock(c.user):
-                await self.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
+                await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
                 if good:
                     msg = _("{skill} **{c}** is focusing on the monster ahead...{skill}").format(
                         c=escape(user.display_name),
@@ -649,7 +649,7 @@ class SpecialActionButton(discord.ui.Button):
         if c.heroclass["cooldown"] <= time.time():
             c.heroclass["ability"] = True
             c.heroclass["cooldown"] = time.time() + cooldown_time
-            await self.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
+            await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
                 interaction,
                 _("{skill} **{c}** is starting to froth at the mouth... {skill}").format(
@@ -673,7 +673,7 @@ class SpecialActionButton(discord.ui.Button):
             c.heroclass["ability"] = True
             c.heroclass["cooldown"] = time.time() + cooldown_time
 
-            await self.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
+            await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
                 interaction,
                 _("{skill} **{c}** is focusing all of their energy... {skill}").format(
@@ -696,7 +696,7 @@ class SpecialActionButton(discord.ui.Button):
         if c.heroclass["cooldown"] <= time.time():
             c.heroclass["ability"] = True
             c.heroclass["cooldown"] = time.time() + cooldown_time
-            await self.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
+            await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
                 interaction,
                 _("{skill} **{c}** is whipping up a performance... {skill}").format(
