@@ -606,7 +606,7 @@ class Adventure(
         if ctx.message.id in self._loss_message:
             extramsg = self._loss_message.pop(ctx.message.id)
             if extramsg:
-                extramsg = _(f"{extramsg} za popravak svoje opreme.")
+                extramsg = _(f"{extramsg} na popravak svoje opreme.")
                 for msg in pagify(extramsg, page_length=1900):
                     await smart_embed(ctx, msg, success=False)
         while ctx.guild.id in self._sessions:
@@ -1452,7 +1452,7 @@ class Adventure(
                 for (user, loss) in repair_list:
                     if user not in temp_repair:
                         loss_list.append(
-                            _("\n{user} je iskoristio {loss} {currency_name}").format(
+                            _("\n{user} je potrošio {loss} {currency_name}").format(
                                 user=user.mention,
                                 loss=humanize_number(loss),
                                 currency_name=currency_name,
@@ -1574,7 +1574,7 @@ class Adventure(
                     for (user, loss) in repair_list:
                         if user not in temp_repair:
                             loss_list.append(
-                                _("\n{user} je iskoristio {loss} {currency_name}").format(
+                                _("\n{user} je potrošio {loss} {currency_name}").format(
                                     user=user.mention,
                                     loss=humanize_number(loss),
                                     currency_name=currency_name,
@@ -1752,7 +1752,7 @@ class Adventure(
             for (user, loss) in repair_list:
                 if user not in temp_repair:
                     loss_list.append(
-                        _("\n{user} je iskoristio {loss} {currency_name}").format(
+                        _("\n{user} je potrošio {loss} {currency_name}").format(
                             user=user.mention,
                             loss=humanize_number(loss),
                             currency_name=currency_name,
