@@ -1039,7 +1039,7 @@ class Adventure(
         await self.bot.wait_until_ready()
         if user.bot:
             return
-        emojis = ReactionPredicate.NUMBER_EMOJIS + self._adventure_actions
+        emojis = list(ReactionPredicate.NUMBER_EMOJIS) + self._adventure_actions
         if str(reaction.emoji) not in emojis:
             return
         if self.red_340_or_newer:
@@ -2362,7 +2362,8 @@ class Adventure(
             secondint = int(seconds)
             adv_end = await _get_epoch(secondint)
             timer, done, sremain = await _remaining(adv_end)
-            message_adv = await ctx.send(f"⏳ [{title}] {timer}s")
+            timer = f"<t:{int(adv_end)}:R>"
+            message_adv = await ctx.send(f"⏳ [{title}] {timer}")
             deleted = False
             while not done:
                 timer, done, sremain = await _remaining(adv_end)
@@ -2371,11 +2372,6 @@ class Adventure(
                     if not deleted:
                         await message_adv.delete()
                     break
-                elif not deleted and int(sremain) % 5 == 0:
-                    try:
-                        await message_adv.edit(content=f"⏳ [{title}] {timer}s")
-                    except discord.NotFound:
-                        deleted = True
                 await asyncio.sleep(1)
             log.debug("Timer countdown done.")
 
