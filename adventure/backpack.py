@@ -60,6 +60,7 @@ class BackPackCommands(AdventureMixin):
 
         Note: An item **degrade** level is how many rebirths it will last, before it is broken down.
         """
+
         assert isinstance(rarity, str) or rarity is None
         assert isinstance(slot, str) or slot is None
         if not await self.allow_in_dm(ctx):
@@ -76,6 +77,7 @@ class BackPackCommands(AdventureMixin):
                     return await smart_embed(
                         ctx,
                         _("{} is not a valid rarity, select one of {}").format(rarity, humanize_list(RARITIES)),
+                        ephemeral=True,
                     )
             if slot:
                 slot = slot.lower()
@@ -83,8 +85,9 @@ class BackPackCommands(AdventureMixin):
                     return await smart_embed(
                         ctx,
                         _("{} is not a valid slot, select one of {}").format(slot, humanize_list(ORDER)),
+                        ephemeral=True,
                     )
-
+            await ctx.defer()
             msgs = await c.get_backpack(rarity=rarity, slot=slot, show_delta=show_diff)
             if not msgs:
                 return await smart_embed(
@@ -107,7 +110,9 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to equip an item but the monster ahead of you commands your attention."),
+                ephemeral=True,
             )
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             try:
                 c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
@@ -159,7 +164,9 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to magically equip multiple items at once, but the monster ahead nearly killed you."),
+                ephemeral=True,
             )
+        await ctx.defer()
         set_list = humanize_list(sorted([f"`{i}`" for i in self.SET_BONUSES.keys()], key=str.lower))
         if set_name is None:
             ctx.command.reset_cooldown(ctx)
@@ -202,8 +209,9 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to disassemble an item but the monster ahead of you commands your attention."),
+                ephemeral=True,
             )
-
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             if len(backpack_items[1]) > 2:
                 msg = await ctx.send(
@@ -314,6 +322,7 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to go sell your items but the monster ahead is not allowing you to leave."),
+                ephemeral=True,
             )
         if rarity:
             rarity = rarity.lower()
@@ -321,17 +330,21 @@ class BackPackCommands(AdventureMixin):
                 return await smart_embed(
                     ctx,
                     _("{} is not a valid rarity, select one of {}").format(rarity, humanize_list(RARITIES)),
+                    ephemeral=True,
                 )
             if rarity.lower() in ["forged"]:
-                return await smart_embed(ctx, _("You cannot sell `{rarity}` rarity items.").format(rarity=rarity))
+                return await smart_embed(
+                    ctx, _("You cannot sell `{rarity}` rarity items.").format(rarity=rarity), ephemeral=True
+                )
         if slot:
             slot = slot.lower()
             if slot not in ORDER:
                 return await smart_embed(
                     ctx,
                     _("{} is not a valid slot, select one of {}").format(slot, humanize_list(ORDER)),
+                    ephemeral=True,
                 )
-
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             if rarity and slot:
                 msg = await ctx.send(
@@ -424,6 +437,7 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to go sell your items but the monster ahead is not allowing you to leave."),
+                ephemeral=True,
             )
         if item.rarity in ["forged"]:
             ctx.command.reset_cooldown(ctx)
@@ -435,7 +449,7 @@ class BackPackCommands(AdventureMixin):
                     lang="css",
                 )
             )
-
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             try:
                 c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
@@ -583,11 +597,13 @@ class BackPackCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You take the item and pass it from one hand to the other. Congratulations, you traded yourself."),
+                ephemeral=True,
             )
         if self.in_adventure(ctx):
             return await smart_embed(
                 ctx,
                 _("You tried to trade an item to a party member but the monster ahead commands your attention."),
+                ephemeral=True,
             )
         if self.in_adventure(user=buyer):
             return await smart_embed(
@@ -595,9 +611,11 @@ class BackPackCommands(AdventureMixin):
                 _("**{buyer}** is currently in an adventure... you were unable to reach them via pigeon.").format(
                     buyer=escape(buyer.display_name)
                 ),
+                ephemeral=True,
             )
         if asking < 0:
-            return await ctx.send(_("You can't *sell* for less than 0..."))
+            return await ctx.send(_("You can't *sell* for less than 0..."), ephemeral=True)
+        await ctx.defer()
         try:
             c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
         except Exception as exc:

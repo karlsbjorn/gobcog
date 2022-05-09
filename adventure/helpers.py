@@ -2,7 +2,7 @@ import contextlib
 import random
 import re
 import time
-from typing import Union
+from typing import Union, Optional
 
 import discord
 from discord.ext.commands import CheckFailure
@@ -25,14 +25,27 @@ def escape(t: str) -> str:
     return _escape(filter_various_mentions(t), mass_mentions=True, formatting=True)
 
 
-async def smart_embed(ctx, message, success=None, image=None, ephemeral=False, cog=None):
-    is_slash = False
-    if isinstance(ctx, discord.Interaction):
-        is_slash = True
+async def smart_embed(
+    ctx: Optional[commands.Context] = None,
+    message: Optional[str] = None,
+    success: Optional[bool] = None,
+    image: Optional[str] = None,
+    ephemeral: bool = False,
+    cog: Optional[commands.Cog] = None,
+    interaction: Optional[discord.Interaction] = None,
+):
+    is_slash = interaction is not None and ctx is None
+    if is_slash:
+        bot = interaction.client
+        guild = interaction.guild
+    else:
+        bot = ctx.bot
+        guild = ctx.guild
+
     if cog is None:
-        cog = ctx.cog
-    if ctx.guild:
-        use_embeds = await cog.config.guild(ctx.guild).embed()
+        cog = bot.get_cog("Adventure")
+    if guild:
+        use_embeds = await cog.config.guild(guild).embed()
     else:
         use_embeds = True
     if use_embeds:
@@ -43,36 +56,36 @@ async def smart_embed(ctx, message, success=None, image=None, ephemeral=False, c
                 colour = discord.Colour.dark_red()
             else:
                 if is_slash:
-                    colour = await cog.bot.get_embed_colour(ctx.channel)
+                    colour = await bot.get_embed_colour(ctx.channel)
                 else:
                     colour = await ctx.embed_colour()
             embed = discord.Embed(description=message, color=colour)
             if image:
                 embed.set_thumbnail(url=image)
             if is_slash:
-                if ctx.response.is_done():
-                    await ctx.followup.send(embed=embed, ephemeral=ephemeral)
+                if interaction.response.is_done():
+                    await interaction.followup.send(embed=embed, ephemeral=ephemeral)
                 else:
-                    await ctx.response.send_message(embed=embed, ephemeral=ephemeral)
+                    await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
             else:
-                await ctx.send(embed=embed)
+                await ctx.send(embed=embed, ephemeral=ephemeral)
             return
         else:
             if is_slash:
-                if ctx.response.is_done():
-                    await ctx.followup.send(message, ephemeral=ephemeral)
+                if interaction.response.is_done():
+                    await interaction.followup.send(message, ephemeral=ephemeral)
                 else:
-                    await ctx.response.send_message(message, ephemeral=ephemeral)
+                    await interaction.response.send_message(message, ephemeral=ephemeral)
             else:
-                await ctx.send(message)
+                await ctx.send(message, ephemeral=ephemeral)
             return
     if is_slash:
-        if ctx.response.is_done():
-            await ctx.followup.send(message, ephemeral=ephemeral)
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=ephemeral)
         else:
-            await ctx.response.send_message(message, ephemeral=ephemeral)
+            await interaction.response.send_message(message, ephemeral=ephemeral)
     else:
-        await ctx.send(message)
+        await ctx.send(message, ephemeral=ephemeral)
 
 
 def check_running_adventure(ctx):

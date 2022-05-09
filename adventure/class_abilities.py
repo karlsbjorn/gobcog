@@ -992,12 +992,13 @@ class ClassAbilities(AdventureMixin):
                     )
                 pages = await c.get_backpack(forging=True, clean=True)
                 if not pages:
-                    return await smart_embed(
+                    await smart_embed(
                         ctx,
                         _("**{}**, you need at least two forgeable items in your backpack to forge.").format(
                             escape(ctx.author.display_name)
                         ),
                     )
+                    return
                 await BaseMenu(
                     source=SimpleSource(pages),
                     delete_message_after=True,

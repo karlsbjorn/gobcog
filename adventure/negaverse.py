@@ -47,6 +47,7 @@ class Negaverse(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to teleport to another dimension but the monster ahead did not give you a chance."),
+                ephemeral=True
             )
 
         bal = await bank.get_balance(ctx.author)
@@ -61,10 +62,12 @@ class Negaverse(AdventureMixin):
                     "**{author}**, you need to specify how many "
                     "{currency_name} you are willing to offer to the gods for your success."
                 ).format(author=escape(ctx.author.display_name), currency_name=currency_name),
+                ephemeral=True
             )
         if offering <= 500 or bal <= 500:
             ctx.command.reset_cooldown(ctx)
-            return await smart_embed(ctx, _("The gods refuse your pitiful offering."))
+            return await smart_embed(ctx, _("The gods refuse your pitiful offering."), ephemeral=True)
+        await ctx.defer()
         if offering > bal:
             offering = int(bal)
         admin_roll = -1

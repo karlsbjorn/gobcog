@@ -512,7 +512,7 @@ class Adventure(
 
         You play by reacting with the offered emojis.
         """
-
+        await ctx.defer()
         if ctx.guild.id in self._sessions and self._sessions[ctx.guild.id].finished is False:
             adventure_obj = self._sessions[ctx.guild.id]
             link = adventure_obj.message.jump_url

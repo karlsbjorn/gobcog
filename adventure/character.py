@@ -47,12 +47,14 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("The skill cleric is back in town and the monster ahead of you is demanding your attention."),
+                ephemeral=True
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
         if amount < 1:
-            return await smart_embed(ctx, _("Nice try :smirk:"))
+            return await smart_embed(ctx, _("Nice try :smirk:"), ephemeral=True)
         skill = skill.value if skill is not None else None  # type: ignore This returns an enum now
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             try:
                 c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
@@ -187,6 +189,7 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("Use this command with one of the following set names: \n{sets}").format(sets=set_list),
+                ephemeral=True
             )
 
         title_cased_set_name = await _title_case(set_name)
@@ -197,8 +200,9 @@ class CharacterCommands(AdventureMixin):
                 _("`{input}` is not a valid set.\n\nPlease use one of the following full set names: \n{sets}").format(
                     input=title_cased_set_name, sets=set_list
                 ),
+                ephemeral=True
             )
-
+        await ctx.defer()
         try:
             c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
         except Exception as exc:
@@ -304,6 +308,7 @@ class CharacterCommands(AdventureMixin):
         except Exception:
             log.exception("Error with the new character sheet")
             return
+        await ctx.defer()
         items = c.get_current_equipment(return_place_holder=True)
         msg = _("{}'s Character Sheet\n\n").format(escape(user.display_name))
         msg_len = len(msg)
@@ -461,9 +466,11 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to unequip your items, but the monster ahead of you looks mighty hungry..."),
+                ephemeral=True
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
+        await ctx.defer()
         async with self.get_lock(ctx.author):
             try:
                 c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
@@ -529,6 +536,7 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to equip your item but the monster ahead nearly decapitated you."),
+                ephemeral=True
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
