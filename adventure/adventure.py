@@ -8,7 +8,7 @@ import time
 from abc import ABC
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Literal, MutableMapping, Union
+from typing import Literal, MutableMapping, Union, Optional
 
 import discord
 from discord.ext.commands import CheckFailure
@@ -31,7 +31,7 @@ from .cart import AdventureCart
 from .character import CharacterCommands
 from .charsheet import Character, calculate_sp, has_funds
 from .class_abilities import ClassAbilities
-from .converters import ArgParserFailure
+from .converters import ArgParserFailure, ChallengeConverter
 from .defaults import default_global, default_guild, default_user
 from .dev import DevCommands
 from .economy import EconomyCommands
@@ -77,7 +77,7 @@ class Adventure(
     Negaverse,
     RebirthCommands,
     ThemesetCommands,
-    commands.Cog,
+    commands.GroupCog,
     metaclass=CompositeMetaClass,
 ):
     """Adventure, derived from the Goblins Adventure cog by locastan."""
@@ -196,6 +196,7 @@ class Adventure(
         log.debug("Creating Task")
         self._init_task = self.bot.loop.create_task(self.initialize())
         self._ready_event = asyncio.Event()
+        self._adventure.app_command.name = "start"
 
     async def cog_before_invoke(self, ctx: commands.Context):
         await self._ready_event.wait()
@@ -498,10 +499,10 @@ class Adventure(
                 await asyncio.sleep(5)
 
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
-    @commands.command(name="adventure", aliases=["a"])
+    @commands.hybrid_command(name="adventure", aliases=["a"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.guild_only()
-    async def _adventure(self, ctx: commands.Context, *, challenge=None):
+    async def _adventure(self, ctx: commands.Context, *, challenge: Optional[ChallengeConverter] = None):
         """This will send you on an adventure!
 
         You play by reacting with the offered emojis.
@@ -544,9 +545,7 @@ class Adventure(
             cooldown_time = int(cooldown + cooldown_time)
             return await smart_embed(
                 ctx,
-                _("No heroes are ready to depart in an adventure, try again <t:{}:R>.").format(
-                    cooldown_time
-                ),
+                _("No heroes are ready to depart in an adventure, try again <t:{}:R>.").format(cooldown_time),
             )
 
         if challenge and not (is_dev(ctx.author) or await ctx.bot.is_owner(ctx.author)):

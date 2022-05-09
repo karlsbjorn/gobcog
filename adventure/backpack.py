@@ -38,7 +38,7 @@ log = logging.getLogger("red.cogs.adventure")
 class BackPackCommands(AdventureMixin):
     """This class will handle interacting with adventures backpack"""
 
-    @commands.group(name="backpack", autohelp=False)
+    @commands.hybrid_group(name="backpack", autohelp=False, fallback="show")
     @commands.bot_has_permissions(add_reactions=True)
     async def _backpack(
         self,

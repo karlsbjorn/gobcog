@@ -20,7 +20,7 @@ log = logging.getLogger("red.cogs.adventure")
 
 
 class RebirthCommands(AdventureMixin):
-    @commands.command()
+    @commands.hybrid_command(name="rebirth")
     @commands.bot_has_permissions(add_reactions=True)
     @commands.guild_only()
     async def rebirth(self, ctx: commands.Context):
@@ -74,18 +74,18 @@ class RebirthCommands(AdventureMixin):
             open_msg = await smart_embed(
                 ctx,
                 _(
-                    f"Rebirthing will:\n\n"
-                    f"* cost {int(rebirth_cost)}% of your credits\n"
-                    f"* cost all of your current gear\n"
-                    f"{space*4}- Legendary and Ascended items lose one degradation "
-                    f"point per rebirth and are broken down when they have 0 left.\n"
-                    f"{space*4}- Set items never disappear\n"
-                    f"* set you back to level 1 while keeping your current class\n\n"
-                    f"In turn, rebirthing will give you a higher stat base, a better chance "
-                    f"for acquiring more powerful items, a higher max level, and the "
-                    f"ability to convert chests to higher rarities after the second rebirth.\n\n"
-                    f"Would you like to rebirth?"
-                ),
+                    "Rebirthing will:\n\n"
+                    "* cost {cost}% of your credits\n"
+                    "* cost all of your current gear\n"
+                    "{space}- Legendary and Ascended items lose one degradation "
+                    "point per rebirth and are broken down when they have 0 left.\n"
+                    "{space}- Set items never disappear\n"
+                    "* set you back to level 1 while keeping your current class\n\n"
+                    "In turn, rebirthing will give you a higher stat base, a better chance "
+                    "for acquiring more powerful items, a higher max level, and the "
+                    "ability to convert chests to higher rarities after the second rebirth.\n\n"
+                    "Would you like to rebirth?"
+                ).format(cost=int(rebirth_cost), space=space*4),
             )
             start_adding_reactions(open_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(open_msg, ctx.author)

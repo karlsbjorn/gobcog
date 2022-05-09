@@ -73,7 +73,7 @@ class LeaderboardCommands(AdventureMixin):
         else:
             return sorted_acc[:positions]
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     @commands.guild_only()
     async def aleaderboard(self, ctx: commands.Context, show_global: bool = False):
@@ -204,7 +204,7 @@ class LeaderboardCommands(AdventureMixin):
         else:
             return sorted_acc[:positions]
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     @commands.guild_only()
     async def scoreboard(self, ctx: commands.Context, show_global: bool = False):
@@ -223,7 +223,7 @@ class LeaderboardCommands(AdventureMixin):
         else:
             await smart_embed(ctx, _("There are no adventurers in the server."))
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     @commands.guild_only()
     async def nvsb(self, ctx: commands.Context, show_global: bool = False):
@@ -240,7 +240,7 @@ class LeaderboardCommands(AdventureMixin):
         else:
             await smart_embed(ctx, _("There are no adventurers in the server."))
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     @commands.guild_only()
     async def wscoreboard(self, ctx: commands.Context, show_global: bool = False):

@@ -27,11 +27,19 @@ log = logging.getLogger("red.cogs.adventure")
 class Negaverse(AdventureMixin):
     """This class will handle negaverse interactions"""
 
-    @commands.command(name="negaverse", aliases=["nv"], cooldown_after_parsing=True)
+    @commands.hybrid_command(name="negaverse", aliases=["nv"], cooldown_after_parsing=True)
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
     @commands.guild_only()
+    async def _negaverse_command(self, ctx: commands.Context, offering: int):
+        """This will send you to fight a nega-member!"""
+        await self._negaverse(ctx, offering)
+
     async def _negaverse(
-        self, ctx: commands.Context, offering: int = None, roll: Optional[int] = -1, nega: discord.Member = None
+        self,
+        ctx: commands.Context,
+        offering: Optional[int] = None,
+        roll: int = -1,
+        nega: Optional[discord.Member] = None,
     ):
         """This will send you to fight a nega-member!"""
         if self.in_adventure(ctx):
@@ -364,3 +372,20 @@ class Negaverse(AdventureMixin):
 
                 if changed:
                     await self.config.user(ctx.author).set(await character.to_json(ctx, self.config))
+
+    @_negaverse_command.error
+    async def negaverse_error(self, ctx: commands.Context, error: Exception):
+        if isinstance(error, (commands.MissingRequiredArgument, commands.BadArgument)):
+            ctx.command.reset_cooldown(ctx)
+            currency_name = await bank.get_currency_name(
+                ctx.guild,
+            )
+            return await smart_embed(
+                ctx,
+                _(
+                    "**{author}**, you need to specify how many "
+                    "{currency_name} you are willing to offer to the gods for your success."
+                ).format(author=escape(ctx.author.display_name), currency_name=currency_name),
+            )
+        else:
+            await ctx.bot.on_command_error(ctx, error)

@@ -5,6 +5,7 @@ import logging
 import random
 import time
 from math import ceil
+from typing import Optional, Literal
 
 import discord
 from discord.ext.commands.errors import BadArgument
@@ -18,7 +19,7 @@ from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER
-from .converters import ItemConverter
+from .converters import ItemConverter, HeroClassConverter
 from .helpers import escape, is_dev, smart_embed
 from .menus import BaseMenu, SimpleSource
 
@@ -30,10 +31,13 @@ log = logging.getLogger("red.cogs.adventure")
 class ClassAbilities(AdventureMixin):
     """This class will handle class abilities"""
 
-    @commands.command(cooldown_after_parsing=True)
+    @commands.hybrid_command(cooldown_after_parsing=True)
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
-    async def heroclass(self, ctx: commands.Context, clz: str = None, action: str = None):
+    @discord.app_commands.rename(clz="class")
+    async def heroclass(
+        self, ctx: commands.Context, clz: Optional[HeroClassConverter] = None, action: Optional[Literal["info"]] = None
+    ):
         """Allows you to select a class if you are level 10 or above.
 
         For information on class use: `[p]heroclass classname info`.
@@ -332,7 +336,7 @@ class ClassAbilities(AdventureMixin):
                             ),
                         )
 
-    @commands.group(autohelp=False)
+    @commands.hybrid_group(autohelp=False, fallback="find")
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def pet(self, ctx: commands.Context):
         """[Ranger Class Only]
@@ -555,7 +559,7 @@ class ClassAbilities(AdventureMixin):
             else:
                 return await ctx.send(box(_("You don't have a pet."), lang="css"))
 
-    @commands.command()
+    @commands.hybrid_command()
     async def bless(self, ctx: commands.Context):
         """[Cleric Class Only]
 
@@ -606,7 +610,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.guild_only()
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def insight(self, ctx: commands.Context):
@@ -785,7 +789,7 @@ class ClassAbilities(AdventureMixin):
                     ),
                 )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def rage(self, ctx: commands.Context):
         """[Berserker Class Only]
 
@@ -836,7 +840,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def focus(self, ctx: commands.Context):
         """[Wizard Class Only]
 
@@ -887,7 +891,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def music(self, ctx: commands.Context):
         """[Bard Class Only]
 
@@ -938,9 +942,9 @@ class ClassAbilities(AdventureMixin):
                     )
 
     @commands.max_concurrency(1, per=commands.BucketType.user)
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True)
-    async def forge(self, ctx):
+    async def forge(self, ctx: commands.Context):
         """[Tinkerer Class Only]
 
         This allows a Tinkerer to forge two items into a device. (1h cooldown)

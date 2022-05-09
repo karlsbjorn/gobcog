@@ -3,6 +3,7 @@ import asyncio
 import logging
 import time
 from operator import itemgetter
+from typing import Optional, Literal, List
 
 import discord
 from beautifultable import ALIGN_LEFT, BeautifulTable
@@ -17,7 +18,7 @@ from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER
-from .converters import EquipableItemConverter, EquipmentConverter
+from .converters import EquipableItemConverter, EquipmentConverter, SkillConverter
 from .helpers import _title_case, escape, smart_embed
 from .menus import BaseMenu, SimpleSource
 
@@ -29,9 +30,14 @@ log = logging.getLogger("red.cogs.adventure")
 class CharacterCommands(AdventureMixin):
     """This class handles character sheet adjustments by the player"""
 
-    @commands.command()
+    @commands.hybrid_command(name="skill")
     @commands.cooldown(rate=1, per=2, type=commands.BucketType.user)
-    async def skill(self, ctx: commands.Context, spend: str = None, amount: int = 1):
+    async def skill(
+        self,
+        ctx: commands.Context,
+        skill: Optional[SkillConverter] = None,
+        amount: int = 1,
+    ):
         """This allows you to spend skillpoints.
 
         `[p]skill attack/charisma/intelligence`
@@ -46,13 +52,14 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
         if amount < 1:
             return await smart_embed(ctx, _("Nice try :smirk:"))
+        skill = skill.value if skill is not None else None  # type: ignore This returns an enum now
         async with self.get_lock(ctx.author):
             try:
                 c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
             except Exception as exc:
                 log.exception("Error with the new character sheet", exc_info=exc)
                 return
-            if spend == "reset":
+            if skill == "reset":
                 last_reset = await self.config.user(ctx.author).last_skill_reset()
                 if last_reset + 3600 > time.time():
                     return await smart_embed(ctx, _("You reset your skills within the last hour, try again later."))
@@ -118,38 +125,47 @@ class CharacterCommands(AdventureMixin):
                         escape(ctx.author.display_name), c.skill["pool"]
                     ),
                 )
-            if spend is None:
+            if skill is None:
+                command1 = f"{ctx.clean_prefix}skill attack"
+                command2 = f"{ctx.clean_prefix}skill charisma"
+                command3 = f"{ctx.clean_prefix}skill intelligence"
+                if ctx.interaction:
+                    command1 = f"{ctx.clean_prefix}adventure skill attack"
+                    command2 = f"{ctx.clean_prefix}adventure skill charisma"
+                    command3 = f"{ctx.clean_prefix}adventure skill intelligence"
                 await smart_embed(
                     ctx,
                     _(
                         "**{author}**, you currently have **{skillpoints}** unspent skillpoints.\n"
                         "If you want to put them towards a permanent attack, "
                         "charisma or intelligence bonus, use "
-                        "`{prefix}skill attack`, `{prefix}skill charisma` or "
-                        "`{prefix}skill intelligence`"
+                        "`{command1}`, `{command2}` or "
+                        "`{command3}`"
                     ).format(
                         author=escape(ctx.author.display_name),
                         skillpoints=str(c.skill["pool"]),
-                        prefix=ctx.prefix,
+                        command1=command1,
+                        command2=command2,
+                        command3=command3,
                     ),
                 )
             else:
                 att = ["attack", "att", "atk"]
                 cha = ["diplomacy", "charisma", "cha", "dipl"]
                 intel = ["intelligence", "intellect", "int", "magic"]
-                if spend not in att + cha + intel:
+                if skill not in att + cha + intel:
                     return await smart_embed(
                         ctx, _("Don't try to fool me! There is no such thing as {}.").format(spend)
                     )
-                elif spend in att:
+                elif skill in att:
                     c.skill["pool"] -= amount
                     c.skill["att"] += amount
                     spend = "attack"
-                elif spend in cha:
+                elif skill in cha:
                     c.skill["pool"] -= amount
                     c.skill["cha"] += amount
                     spend = "charisma"
-                elif spend in intel:
+                elif skill in intel:
                     c.skill["pool"] -= amount
                     c.skill["int"] += amount
                     spend = "intelligence"
@@ -161,7 +177,7 @@ class CharacterCommands(AdventureMixin):
                     ),
                 )
 
-    @commands.command(name="setinfo")
+    @commands.hybrid_command(name="setinfo")
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     async def set_show(self, ctx: commands.Context, *, set_name: str = None):
         """Show set bonuses for the specified set."""
@@ -262,7 +278,18 @@ class CharacterCommands(AdventureMixin):
             timeout=60,
         ).start(ctx=ctx)
 
-    @commands.command()
+    @set_show.autocomplete("set_name")
+    async def set_show_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[discord.app_commands.Choice]:
+        choices = [
+            discord.app_commands.Choice(name=i, value=i)
+            for i in self.SET_BONUSES.keys()
+            if current.lower() in i.lower()
+        ]
+        return choices[:25]
+
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True)
     async def stats(self, ctx: commands.Context, *, user: discord.Member = None):
         """This draws up a character sheet of you or an optionally specified member."""
@@ -424,7 +451,7 @@ class CharacterCommands(AdventureMixin):
             form_string += f"\nPage {index}"
         return form_string
 
-    @commands.command()
+    @commands.hybrid_command()
     async def unequip(self, ctx: commands.Context, *, item: EquipmentConverter):
         """This stashes a specified equipped item into your backpack.
 
@@ -495,7 +522,7 @@ class CharacterCommands(AdventureMixin):
                     ),
                 )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def equip(self, ctx: commands.Context, *, item: EquipableItemConverter):
         """This equips an item from your backpack."""
         if self.in_adventure(ctx):

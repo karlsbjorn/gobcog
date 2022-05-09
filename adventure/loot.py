@@ -3,6 +3,7 @@ import asyncio
 import logging
 import random
 import time
+from typing import Optional, Literal
 
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from redbot.core import commands
@@ -28,14 +29,20 @@ log = logging.getLogger("red.cogs.adventure")
 class LootCommands(AdventureMixin):
     """This class will handle Loot interactions"""
 
-    @commands.command()
+    @commands.hybrid_command(name="loot")
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(rate=1, per=4, type=commands.BucketType.user)
-    async def loot(self, ctx: commands.Context, box_type: str = None, number: int = 1):
+    async def loot(
+        self,
+        ctx: commands.Context,
+        box_type: Optional[Literal["normal", "rare", "epic", "legendary", "ascended", "set"]] = None,
+        number: int = 1,
+    ):
         """This opens one of your precious treasure chests.
 
         Use the box rarity type with the command: normal, rare, epic, legendary, ascended or set.
         """
+        await ctx.defer()
         if (not is_dev(ctx.author) and number > 100) or number < 1:
             return await smart_embed(ctx, _("Nice try :smirk:."))
         if self.in_adventure(ctx):
@@ -253,9 +260,14 @@ class LootCommands(AdventureMixin):
             parts=1,
         )
 
-    @commands.command()
+    @commands.hybrid_command(name="convert")
     @commands.cooldown(rate=1, per=4, type=commands.BucketType.guild)
-    async def convert(self, ctx: commands.Context, box_rarity: str, amount: int = 1):
+    async def convert(
+        self,
+        ctx: commands.Context,
+        box_rarity: Literal["normal", "rare", "epic", "legendary", "ascended", "set"],
+        amount: int = 1,
+    ):
         """Convert normal, rare or epic chests.
 
         Trade 25 normal chests for 1 rare chest.
