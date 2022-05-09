@@ -196,7 +196,12 @@ class Adventure(
         log.debug("Creating Task")
         self._init_task = self.bot.loop.create_task(self.initialize())
         self._ready_event = asyncio.Event()
+        # This is done to prevent having a top level text command named "start"
+        # in order to keep the slash command variant called `/adventure start`
+        # which is a lot better than `/adventure adventure`
+        self.app_command.remove_command("adventure")
         self._adventure.app_command.name = "start"
+        self.app_command.add_command(self._adventure.app_command)
 
     async def cog_before_invoke(self, ctx: commands.Context):
         await self._ready_event.wait()
