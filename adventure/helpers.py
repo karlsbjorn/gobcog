@@ -38,9 +38,11 @@ async def smart_embed(
     if is_slash:
         bot = interaction.client
         guild = interaction.guild
+        channel = interaction.channel
     else:
         bot = ctx.bot
         guild = ctx.guild
+        channel = ctx.channel
 
     if cog is None:
         cog = bot.get_cog("Adventure")
@@ -56,7 +58,7 @@ async def smart_embed(
                 colour = discord.Colour.dark_red()
             else:
                 if is_slash:
-                    colour = await bot.get_embed_colour(ctx.channel)
+                    colour = await bot.get_embed_colour(channel)
                 else:
                     colour = await ctx.embed_colour()
             embed = discord.Embed(description=message, color=colour)

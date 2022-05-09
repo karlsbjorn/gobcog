@@ -627,13 +627,21 @@ class SpecialActionButton(discord.ui.Button):
                     image = None
                     if roll >= 0.4:
                         image = session.monster["image"]
-                    return await smart_embed(interaction, msg, success=True, image=image, cog=self.view.cog)
+                    return await smart_embed(
+                        ctx=None,
+                        message=msg,
+                        success=True,
+                        image=image,
+                        cog=self.view.cog,
+                        interaction=interaction,
+                    )
                 else:
                     return await smart_embed(
-                        interaction,
-                        _("You have failed to discover anything about this monster."),
+                        ctx=None,
+                        message=_("You have failed to discover anything about this monster."),
                         success=False,
                         cog=self.view.cog,
+                        interaction=interaction,
                     )
             else:
                 await self.send_cooldown(interaction, c, cooldown_time)
@@ -651,12 +659,13 @@ class SpecialActionButton(discord.ui.Button):
             c.heroclass["cooldown"] = time.time() + cooldown_time
             await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
-                interaction,
+                None,
                 _("{skill} **{c}** is starting to froth at the mouth... {skill}").format(
                     c=escape(user.display_name),
                     skill=self.view.cog.emojis.skills.berserker,
                 ),
                 cog=self.view.cog,
+                interaction=interaction,
             )
         else:
             await self.send_cooldown(interaction, c, cooldown_time)
@@ -675,12 +684,13 @@ class SpecialActionButton(discord.ui.Button):
 
             await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
-                interaction,
+                None,
                 _("{skill} **{c}** is focusing all of their energy... {skill}").format(
                     c=escape(user.display_name),
                     skill=self.view.cog.emojis.skills.wizzard,
                 ),
                 cog=self.view.cog,
+                interaction=interaction,
             )
         else:
             await self.send_cooldown(interaction, c, cooldown_time)
@@ -698,11 +708,12 @@ class SpecialActionButton(discord.ui.Button):
             c.heroclass["cooldown"] = time.time() + cooldown_time
             await self.view.cog.config.user(user).set(await c.to_json(self.view.ctx, self.view.cog.config))
             await smart_embed(
-                interaction,
+                None,
                 _("{skill} **{c}** is whipping up a performance... {skill}").format(
                     c=escape(user.display_name), skill=self.view.cog.emojis.skills.bard
                 ),
                 cog=self.view.cog,
+                interaction=interaction,
             )
         else:
             await self.send_cooldown(interaction, c, cooldown_time)
@@ -711,7 +722,7 @@ class SpecialActionButton(discord.ui.Button):
         msg = _("**{user}**, you need to be participating in this adventure to use this ability.").format(
             user=interaction.user.display_name
         )
-        await smart_embed(interaction, msg, success=False, ephemeral=True, cog=self.view.cog)
+        await smart_embed(None, msg, success=False, ephemeral=True, cog=self.view.cog, interaction=interaction)
         return
 
     async def callback(self, interaction: discord.Interaction):
@@ -731,7 +742,7 @@ class SpecialActionButton(discord.ui.Button):
                 msg = _(
                     "**{user}**, you need to be a Bard, Berserker, Cleric, Psychic, or Wizard to use this ability."
                 ).format(user=interaction.user.display_name)
-                await smart_embed(interaction, msg, ephemeral=True, cog=self.view.cog)
+                await smart_embed(None, msg, ephemeral=True, cog=self.view.cog, interaction=interaction)
                 return
             if c.heroclass["name"] == "Cleric":
                 await self.send_cleric(interaction, c)
