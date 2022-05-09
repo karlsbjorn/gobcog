@@ -2,7 +2,7 @@ import contextlib
 import random
 import re
 import time
-from typing import Union, Optional
+from typing import Optional, Union
 
 import discord
 from discord.ext.commands import CheckFailure

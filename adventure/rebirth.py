@@ -26,7 +26,9 @@ class RebirthCommands(AdventureMixin):
     async def rebirth(self, ctx: commands.Context):
         """Resets your character level and increases your rebirths by 1."""
         if self.in_adventure(ctx):
-            return await smart_embed(ctx, _("You tried to rebirth but the monster ahead is commanding your attention."), ephemeral=True)
+            return await smart_embed(
+                ctx, _("You tried to rebirth but the monster ahead is commanding your attention."), ephemeral=True
+            )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
         await ctx.defer()

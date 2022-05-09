@@ -47,7 +47,7 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("The skill cleric is back in town and the monster ahead of you is demanding your attention."),
-                ephemeral=True
+                ephemeral=True,
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
@@ -189,7 +189,7 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("Use this command with one of the following set names: \n{sets}").format(sets=set_list),
-                ephemeral=True
+                ephemeral=True,
             )
 
         title_cased_set_name = await _title_case(set_name)
@@ -200,7 +200,7 @@ class CharacterCommands(AdventureMixin):
                 _("`{input}` is not a valid set.\n\nPlease use one of the following full set names: \n{sets}").format(
                     input=title_cased_set_name, sets=set_list
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
         await ctx.defer()
         try:
@@ -466,7 +466,7 @@ class CharacterCommands(AdventureMixin):
             return await smart_embed(
                 ctx,
                 _("You tried to unequip your items, but the monster ahead of you looks mighty hungry..."),
-                ephemeral=True
+                ephemeral=True,
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
@@ -534,9 +534,7 @@ class CharacterCommands(AdventureMixin):
         """This equips an item from your backpack."""
         if self.in_adventure(ctx):
             return await smart_embed(
-                ctx,
-                _("You tried to equip your item but the monster ahead nearly decapitated you."),
-                ephemeral=True
+                ctx, _("You tried to equip your item but the monster ahead nearly decapitated you."), ephemeral=True
             )
         if not await self.allow_in_dm(ctx):
             return await smart_embed(ctx, _("This command is not available in DM's on this bot."))
