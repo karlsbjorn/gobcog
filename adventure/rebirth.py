@@ -85,7 +85,7 @@ class RebirthCommands(AdventureMixin):
                     "for acquiring more powerful items, a higher max level, and the "
                     "ability to convert chests to higher rarities after the second rebirth.\n\n"
                     "Would you like to rebirth?"
-                ).format(cost=int(rebirth_cost), space=space*4),
+                ).format(cost=int(rebirth_cost), space=space * 4),
             )
             start_adding_reactions(open_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
             pred = ReactionPredicate.yes_or_no(open_msg, ctx.author)

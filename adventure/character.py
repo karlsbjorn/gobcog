@@ -3,7 +3,7 @@ import asyncio
 import logging
 import time
 from operator import itemgetter
-from typing import Optional, Literal, List
+from typing import List, Literal, Optional
 
 import discord
 from beautifultable import ALIGN_LEFT, BeautifulTable
@@ -155,7 +155,7 @@ class CharacterCommands(AdventureMixin):
                 intel = ["intelligence", "intellect", "int", "magic"]
                 if skill not in att + cha + intel:
                     return await smart_embed(
-                        ctx, _("Don't try to fool me! There is no such thing as {}.").format(spend)
+                        ctx, _("Don't try to fool me! There is no such thing as {}.").format(skill)
                     )
                 elif skill in att:
                     c.skill["pool"] -= amount
