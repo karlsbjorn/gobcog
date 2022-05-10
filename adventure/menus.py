@@ -484,6 +484,10 @@ class BaseMenu(discord.ui.View):
             self.add_item(self.forward_button)
             self.add_item(self.last_button)
 
+    async def on_timeout(self):
+        if self.message is not None:
+            await self.message.edit(view=None)
+
     @property
     def source(self):
         return self._source

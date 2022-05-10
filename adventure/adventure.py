@@ -27,7 +27,7 @@ from .adventureresult import AdventureResults
 from .adventureset import AdventureSetCommands
 from .backpack import BackPackCommands
 from .bank import bank
-from .cart import AdventureCart
+from .cart import Trader
 from .character import CharacterCommands
 from .charsheet import Character, calculate_sp, has_funds
 from .class_abilities import ClassAbilities
@@ -68,7 +68,6 @@ class Adventure(
     BackPackCommands,
     CharacterCommands,
     ClassAbilities,
-    AdventureCart,
     DevCommands,
     EconomyCommands,
     LeaderboardCommands,
@@ -1066,14 +1065,6 @@ class Adventure(
                     (timer, done, sremain) = self._adventure_countdown[guild.id]
                     if sremain > 3:
                         await self._handle_adventure(reaction, user)
-        if guild.id in self._current_traders:
-            if reaction.message.id == self._current_traders[guild.id]["msg"] and not self.in_adventure(user=user):
-                if user in self._current_traders[guild.id]["users"]:
-                    return
-                if guild.id in self._trader_countdown:
-                    (timer, done, sremain) = self._trader_countdown[guild.id]
-                    if sremain > 3:
-                        await self._handle_cart(reaction, user)
 
     async def _handle_adventure(self, reaction: discord.Reaction, user: discord.Member):
         action = {v: k for k, v in self._adventure_controls.items()}[str(reaction.emoji)]
@@ -2379,32 +2370,6 @@ class Adventure(
 
         return ctx.bot.loop.create_task(adv_countdown())
 
-    async def _cart_countdown(self, ctx: commands.Context, seconds, title, room=None) -> asyncio.Task:
-        room = room or ctx
-        await self._data_check(ctx)
-
-        async def cart_countdown():
-            secondint = int(seconds)
-            cart_end = await _get_epoch(secondint)
-            timer, done, sremain = await _remaining(cart_end)
-            message_cart = await room.send(f"⏳ [{title}] {timer}s")
-            deleted = False
-            while not done:
-                timer, done, sremain = await _remaining(cart_end)
-                self._trader_countdown[ctx.guild.id] = (timer, done, sremain)
-                if done:
-                    if not deleted:
-                        await message_cart.delete()
-                    break
-                if not deleted and int(sremain) % 5 == 0:
-                    try:
-                        await message_cart.edit(content=f"⏳ [{title}] {timer}s")
-                    except discord.NotFound:
-                        deleted = True
-                await asyncio.sleep(1)
-
-        return ctx.bot.loop.create_task(cart_countdown())
-
     async def _data_check(self, ctx: commands.Context):
         try:
             self._adventure_countdown[ctx.guild.id]
@@ -2443,7 +2408,12 @@ class Adventure(
                 ctx = await self.bot.get_context(message)
                 ctx.command = self.makecart
                 await asyncio.sleep(5)
-                await self._trader(ctx)
+                timeout = await self.config.guild(ctx.guild).cart_timeout()
+                trader = Trader(timeout, ctx, self)
+                await trader.start(ctx)
+                await asyncio.sleep(timeout)
+                trader.stop()
+                await trader.on_timeout()
 
     async def _roll_chest(self, chest_type: str, c: Character):
         # set rarity to chest by default

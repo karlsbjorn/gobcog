@@ -37,7 +37,7 @@ async def smart_embed(
     ephemeral: bool = False,
     cog: Optional[commands.Cog] = None,
     interaction: Optional[discord.Interaction] = None,
-    view: Optional[discord.ui.View] = None,
+    view: Optional[discord.ui.View] = discord.utils.MISSING,
 ) -> discord.Message:
     interaction_only = interaction is not None and ctx is None
     if interaction_only:

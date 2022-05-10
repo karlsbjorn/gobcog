@@ -176,10 +176,6 @@ class AdventureMixin(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    async def _cart_countdown(self, ctx: commands.Context, seconds, title, room=None) -> asyncio.Task:
-        raise NotImplementedError()
-
-    @abstractmethod
     async def _data_check(self, ctx: commands.Context):
         raise NotImplementedError()
 
@@ -404,22 +400,6 @@ class AdventureMixin(ABC):
 
     @abstractmethod
     async def commands_cbackpack_sell(self, ctx: commands.Context, *, query: BackpackFilterParser):
-        raise NotImplementedError()
-
-    #######################################################################
-    # cart.py                                                             #
-    #######################################################################
-
-    @abstractmethod
-    async def _handle_cart(self, reaction: discord.Reaction, user: discord.Member):
-        raise NotImplementedError()
-
-    @abstractmethod
-    async def _trader(self, ctx: commands.Context, bypass=False):
-        raise NotImplementedError()
-
-    @abstractmethod
-    async def _trader_get_items(self, howmany: int):
         raise NotImplementedError()
 
     #######################################################################
