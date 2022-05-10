@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import asyncio
 import contextlib
 import logging
 import random
@@ -11,13 +10,11 @@ import discord
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import box, humanize_number
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import ReactionPredicate
 
 from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character
-from .helpers import escape, is_dev, smart_embed
+from .helpers import ConfirmView, escape, is_dev, smart_embed
 
 _ = Translator("Adventure", __file__)
 
@@ -85,6 +82,7 @@ class Negaverse(AdventureMixin):
         xp_won_final = 0
         lock = self.get_lock(ctx.author)
         await lock.acquire()
+        view = ConfirmView(timeout=60, author=ctx.author)
         try:
             nv_msg = await ctx.send(
                 _(
@@ -95,24 +93,18 @@ class Negaverse(AdventureMixin):
                     offer=humanize_number(offering),
                     currency_name=currency_name,
                     bal=humanize_number(bal),
-                )
+                ),
+                view=view,
             )
-            start_adding_reactions(nv_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-            pred = ReactionPredicate.yes_or_no(nv_msg, ctx.author)
-            try:
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-            except asyncio.TimeoutError:
-                ctx.command.reset_cooldown(ctx)
-                await self._clear_react(nv_msg)
-                lock.release()
-                return
-            if not pred.result:
+            await view.wait()
+            if not view.confirmed:
                 with contextlib.suppress(discord.HTTPException):
                     ctx.command.reset_cooldown(ctx)
                     await nv_msg.edit(
                         content=_("**{}** decides against visiting the negaverse... for now.").format(
                             escape(ctx.author.display_name)
-                        )
+                        ),
+                        view=None,
                     )
                     lock.release()
                     return await self._clear_react(nv_msg)
@@ -136,13 +128,13 @@ class Negaverse(AdventureMixin):
                     "The portal to the negaverse remains closed."
                 )
                 lock.release()
-                return await nv_msg.edit(content=entry_msg)
+                return await nv_msg.edit(content=entry_msg, view=None)
             else:
                 entry_msg = _(
                     "Shadowy hands reach out to take your offering from you and a swirling "
                     "black void slowly grows and engulfs you, transporting you to the negaverse."
                 )
-                await nv_msg.edit(content=entry_msg)
+                await nv_msg.edit(content=entry_msg, view=None)
                 await self._clear_react(nv_msg)
                 await bank.withdraw_credits(ctx.author, offering)
             if nega_set:
@@ -202,7 +194,8 @@ class Negaverse(AdventureMixin):
                         author=escape(ctx.author.display_name),
                         negachar=negachar,
                         loss_msg=loss_msg,
-                    )
+                    ),
+                    view=None,
                 )
                 ctx.command.reset_cooldown(ctx)
             elif roll < 10:
@@ -237,7 +230,8 @@ class Negaverse(AdventureMixin):
                         author=escape(ctx.author.display_name),
                         negachar=negachar,
                         loss_msg=loss_msg,
-                    )
+                    ),
+                    view=None,
                 )
                 ctx.command.reset_cooldown(ctx)
             elif roll == 50 and versus < 50:
@@ -253,7 +247,8 @@ class Negaverse(AdventureMixin):
                         xp_gain=humanize_number(xp_won),
                         offering=humanize_number(offering),
                         currency_name=currency_name,
-                    )
+                    ),
+                    view=None,
                 )
                 with contextlib.suppress(Exception):
                     lock.release()
@@ -277,7 +272,8 @@ class Negaverse(AdventureMixin):
                         negachar=negachar,
                         versus=versus,
                         xp_gain=humanize_number(xp_won),
-                    )
+                    ),
+                    view=None,
                 )
                 with contextlib.suppress(Exception):
                     lock.release()
@@ -299,7 +295,8 @@ class Negaverse(AdventureMixin):
                         roll=roll,
                         negachar=negachar,
                         versus=versus,
-                    )
+                    ),
+                    view=None,
                 )
             else:
                 loss = round(bal / (random.randint(10, 25)))
@@ -339,7 +336,8 @@ class Negaverse(AdventureMixin):
                         negachar=negachar,
                         versus=versus,
                         loss_msg=loss_msg,
-                    )
+                    ),
+                    view=None,
                 )
                 ctx.command.reset_cooldown(ctx)
         finally:

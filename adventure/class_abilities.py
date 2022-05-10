@@ -20,7 +20,7 @@ from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER
 from .converters import HeroClassConverter, ItemConverter
-from .helpers import escape, is_dev, smart_embed
+from .helpers import ConfirmView, escape, is_dev, smart_embed
 from .menus import BaseMenu, SimpleSource
 
 _ = Translator("Adventure", __file__)
@@ -160,6 +160,7 @@ class ClassAbilities(AdventureMixin):
                     if clz == "Psychic" and c.rebirths < 20:
                         ctx.command.reset_cooldown(ctx)
                         return await smart_embed(ctx, _("You are too inexperienced to become a {}.").format(clz))
+                    view = ConfirmView(60, ctx.author)
                     class_msg = await ctx.send(
                         box(
                             _("This will cost {spend} {currency_name}. Do you want to continue, {author}?").format(
@@ -168,7 +169,8 @@ class ClassAbilities(AdventureMixin):
                                 author=escape(ctx.author.display_name),
                             ),
                             lang="css",
-                        )
+                        ),
+                        view=view,
                     )
                     broke = box(
                         _("You don't have enough {currency_name} to train to be a {clz}.").format(
@@ -176,16 +178,8 @@ class ClassAbilities(AdventureMixin):
                         ),
                         lang="css",
                     )
-                    start_adding_reactions(class_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                    pred = ReactionPredicate.yes_or_no(class_msg, ctx.author)
-                    try:
-                        await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                    except asyncio.TimeoutError:
-                        await self._clear_react(class_msg)
-                        ctx.command.reset_cooldown(ctx)
-                        return
-
-                    if not pred.result:
+                    await view.wait()
+                    if not view.confirmed:
                         await class_msg.edit(
                             content=box(
                                 _("{author} decided to continue being a {h_class}.").format(
@@ -213,6 +207,7 @@ class ClassAbilities(AdventureMixin):
                     )
                     if c.lvl >= 10:
                         if c.heroclass["name"] == "Tinkerer" or c.heroclass["name"] == "Ranger":
+                            view = ConfirmView(60, ctx.author)
                             if c.heroclass["name"] == "Tinkerer":
                                 await self._clear_react(class_msg)
                                 await class_msg.edit(
@@ -222,7 +217,8 @@ class ClassAbilities(AdventureMixin):
                                             "device if you change your class.\nShall I proceed?"
                                         ).format(escape(ctx.author.display_name)),
                                         lang="css",
-                                    )
+                                    ),
+                                    view=view,
                                 )
                             else:
                                 await self._clear_react(class_msg)
@@ -232,17 +228,14 @@ class ClassAbilities(AdventureMixin):
                                             "{}, you will lose your pet if you change your class.\nShall I proceed?"
                                         ).format(escape(ctx.author.display_name)),
                                         lang="css",
-                                    )
+                                    ),
+                                    view=view,
                                 )
-                            start_adding_reactions(class_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                            pred = ReactionPredicate.yes_or_no(class_msg, ctx.author)
-                            try:
-                                await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                            except asyncio.TimeoutError:
-                                await self._clear_react(class_msg)
+                            await view.wait()
+                            if view.confirmed is None:
                                 ctx.command.reset_cooldown(ctx)
                                 return
-                            if pred.result:  # user reacted with Yes.
+                            if view.confirmed:  # user reacted with Yes.
                                 tinker_wep = []
                                 for item in c.get_current_equipment():
                                     if item.rarity == "forged":
@@ -1130,17 +1123,12 @@ class ClassAbilities(AdventureMixin):
                         ),
                         lang="css",
                     )
-                    forge_msg = await ctx.send(forge_str)
-                    start_adding_reactions(forge_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                    pred = ReactionPredicate.yes_or_no(forge_msg, ctx.author)
-                    try:
-                        await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                    except asyncio.TimeoutError:
-                        await self._clear_react(forge_msg)
-                        return
+                    view = ConfirmView(60, ctx.author)
+                    forge_msg = await ctx.send(forge_str, view=view)
+                    await view.wait()
                     with contextlib.suppress(discord.HTTPException):
                         await forge_msg.delete()
-                    if pred.result:  # user reacted with Yes.
+                    if view.confirmed:  # user reacted with Yes.
                         c.heroclass["cooldown"] = time.time() + cooldown_time
                         created_item = box(
                             _("{author}, your new {newitem} consumed {lk} and is now lurking in your backpack.").format(

@@ -2,17 +2,21 @@ import contextlib
 import random
 import re
 import time
+from enum import Enum
 from typing import Optional, Union
 
 import discord
 from discord.ext.commands import CheckFailure
 from redbot.core import commands
 from redbot.core.commands import check
+from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import escape as _escape
 from redbot.core.utils.common_filters import filter_various_mentions
 
 from .charsheet import Character, Item
 from .constants import DEV_LIST
+
+_ = Translator("Adventure", __file__)
 
 
 async def _get_epoch(seconds: int):
@@ -33,9 +37,10 @@ async def smart_embed(
     ephemeral: bool = False,
     cog: Optional[commands.Cog] = None,
     interaction: Optional[discord.Interaction] = None,
-):
-    is_slash = interaction is not None and ctx is None
-    if is_slash:
+    view: Optional[discord.ui.View] = None,
+) -> discord.Message:
+    interaction_only = interaction is not None and ctx is None
+    if interaction_only:
         bot = interaction.client
         guild = interaction.guild
         channel = interaction.channel
@@ -43,51 +48,41 @@ async def smart_embed(
         bot = ctx.bot
         guild = ctx.guild
         channel = ctx.channel
+    if success is True:
+        colour = discord.Colour.dark_green()
+    elif success is False:
+        colour = discord.Colour.dark_red()
+    else:
+        colour = await bot.get_embed_colour(channel)
 
     if cog is None:
         cog = bot.get_cog("Adventure")
     if guild:
         use_embeds = await cog.config.guild(guild).embed()
     else:
-        use_embeds = True
+        use_embeds = True or await bot.embed_requested(channel)
     if use_embeds:
-        if is_slash or await ctx.embed_requested():
-            if success is True:
-                colour = discord.Colour.dark_green()
-            elif success is False:
-                colour = discord.Colour.dark_red()
+        embed = discord.Embed(description=message, color=colour)
+        if image:
+            embed.set_thumbnail(url=image)
+        if interaction_only:
+            if interaction.response.is_done():
+                msg = await interaction.followup.send(embed=embed, ephemeral=ephemeral, view=view, wait=True)
             else:
-                if is_slash:
-                    colour = await bot.get_embed_colour(channel)
-                else:
-                    colour = await ctx.embed_colour()
-            embed = discord.Embed(description=message, color=colour)
-            if image:
-                embed.set_thumbnail(url=image)
-            if is_slash:
-                if interaction.response.is_done():
-                    await interaction.followup.send(embed=embed, ephemeral=ephemeral)
-                else:
-                    await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
-            else:
-                await ctx.send(embed=embed, ephemeral=ephemeral)
-            return
+                await interaction.response.send_message(embed=embed, ephemeral=ephemeral, view=view)
+                msg = await interaction.original_message()
+            return msg
         else:
-            if is_slash:
-                if interaction.response.is_done():
-                    await interaction.followup.send(message, ephemeral=ephemeral)
-                else:
-                    await interaction.response.send_message(message, ephemeral=ephemeral)
-            else:
-                await ctx.send(message, ephemeral=ephemeral)
-            return
-    if is_slash:
+            return await ctx.send(embed=embed, ephemeral=ephemeral, view=view)
+    if interaction_only:
         if interaction.response.is_done():
-            await interaction.followup.send(message, ephemeral=ephemeral)
+            msg = await interaction.followup.send(message, ephemeral=ephemeral, view=view, wait=True)
         else:
-            await interaction.response.send_message(message, ephemeral=ephemeral)
+            await interaction.response.send_message(message, ephemeral=ephemeral, view=view)
+            msg = await interaction.original_message()
+        return msg
     else:
-        await ctx.send(message, ephemeral=ephemeral)
+        return await ctx.send(message, ephemeral=ephemeral, view=view)
 
 
 def check_running_adventure(ctx):
@@ -162,3 +157,65 @@ def has_separated_economy():
         return True
 
     return check(predicate)
+
+
+class ConfirmView(discord.ui.View):
+    def __init__(self, timeout: float, author: discord.User):
+        super().__init__(timeout=timeout)
+        self.confirmed = None
+        self.author = author
+
+    @discord.ui.button(label=_("Yes"), style=discord.ButtonStyle.green)
+    async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.confirmed = True
+        self.stop()
+
+    @discord.ui.button(label=_("No"), style=discord.ButtonStyle.red)
+    async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.confirmed = False
+        self.stop()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.author.id:
+            await interaction.response.send_message(_("You are not authorized to interact with this."), ephemeral=True)
+            return False
+        return True
+
+
+class LootSellEnum(Enum):
+    put_away = 0
+    equip = 1
+    sell = 2
+
+
+class LootView(discord.ui.View):
+    def __init__(self, timeout: float, author: discord.User):
+        super().__init__(timeout=timeout)
+        self.result = LootSellEnum.put_away
+        self.author = author
+
+    @discord.ui.button(label=_("Equip"), style=discord.ButtonStyle.green)
+    async def equip_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.result = LootSellEnum.equip
+        self.stop()
+
+    @discord.ui.button(label=_("Sell"), style=discord.ButtonStyle.red)
+    async def sell_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.result = LootSellEnum.sell
+        self.stop()
+
+    @discord.ui.button(label=_("Put away"), style=discord.ButtonStyle.grey)
+    async def putaway_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.result = LootSellEnum.put_away
+        self.stop()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.author.id:
+            await interaction.response.send_message(_("You are not authorized to interact with this."), ephemeral=True)
+            return False
+        return True

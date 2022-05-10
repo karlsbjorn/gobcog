@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
-import asyncio
 import logging
 import time
 
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import box, humanize_number
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import ReactionPredicate
 
 from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, has_funds
-from .helpers import escape, smart_embed
+from .helpers import ConfirmView, escape, smart_embed
 
 _ = Translator("Adventure", __file__)
 
@@ -74,6 +71,7 @@ class RebirthCommands(AdventureMixin):
                     _("You need more {currency_name} to be able to rebirth.").format(currency_name=currency_name),
                 )
             space = "\N{EN SPACE}"
+            view = ConfirmView(60, ctx.author)
             open_msg = await smart_embed(
                 ctx,
                 _(
@@ -89,55 +87,56 @@ class RebirthCommands(AdventureMixin):
                     "ability to convert chests to higher rarities after the second rebirth.\n\n"
                     "Would you like to rebirth?"
                 ).format(cost=int(rebirth_cost), space=space * 4),
+                view=view,
             )
-            start_adding_reactions(open_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-            pred = ReactionPredicate.yes_or_no(open_msg, ctx.author)
-            try:
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-            except asyncio.TimeoutError:
-                await self._clear_react(open_msg)
-                return await smart_embed(ctx, "I can't wait forever, you know.")
-            else:
-                if not pred.result:
-                    await open_msg.edit(
-                        content=box(
-                            _("{c} decided not to rebirth.").format(c=escape(ctx.author.display_name)),
-                            lang="css",
-                        ),
-                        embed=None,
-                    )
-                    return await self._clear_react(open_msg)
+            await view.wait()
 
-                try:
-                    c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
-                except Exception as exc:
-                    log.exception("Error with the new character sheet", exc_info=exc)
-                    return
-                if c.lvl < c.maxlevel:
-                    await open_msg.edit(
-                        content=box(
-                            _("You need to be level `{c}` to rebirth.").format(c=c.maxlevel),
-                            lang="css",
-                        ),
-                        embed=None,
-                    )
-                    return
-                bal = await bank.get_balance(ctx.author)
-                if bal >= 1000:
-                    withdraw = int((bal - 1000) * (rebirth_cost / 100.0))
-                    await bank.withdraw_credits(ctx.author, withdraw)
-                else:
-                    withdraw = int(bal * (rebirth_cost / 100.0))
-                    await bank.set_balance(ctx.author, 0)
-
+            if view.confirmed is None:
+                await smart_embed(ctx, "I can't wait forever, you know.")
+                return
+            if not view.confirmed:
                 await open_msg.edit(
                     content=box(
-                        _("{c}, congratulations on your rebirth.\nYou paid {bal}.").format(
-                            c=escape(ctx.author.display_name),
-                            bal=humanize_number(withdraw),
-                        ),
+                        _("{c} decided not to rebirth.").format(c=escape(ctx.author.display_name)),
                         lang="css",
                     ),
                     embed=None,
+                    view=None,
                 )
-                await self.config.user(ctx.author).set(await c.rebirth())
+                return
+
+            try:
+                c = await Character.from_json(ctx, self.config, ctx.author, self._daily_bonus)
+            except Exception as exc:
+                log.exception("Error with the new character sheet", exc_info=exc)
+                return
+            if c.lvl < c.maxlevel:
+                await open_msg.edit(
+                    content=box(
+                        _("You need to be level `{c}` to rebirth.").format(c=c.maxlevel),
+                        lang="css",
+                    ),
+                    embed=None,
+                    view=None,
+                )
+                return
+            bal = await bank.get_balance(ctx.author)
+            if bal >= 1000:
+                withdraw = int((bal - 1000) * (rebirth_cost / 100.0))
+                await bank.withdraw_credits(ctx.author, withdraw)
+            else:
+                withdraw = int(bal * (rebirth_cost / 100.0))
+                await bank.set_balance(ctx.author, 0)
+
+            await open_msg.edit(
+                content=box(
+                    _("{c}, congratulations on your rebirth.\nYou paid {bal}.").format(
+                        c=escape(ctx.author.display_name),
+                        bal=humanize_number(withdraw),
+                    ),
+                    lang="css",
+                ),
+                embed=None,
+                view=None,
+            )
+            await self.config.user(ctx.author).set(await c.rebirth())

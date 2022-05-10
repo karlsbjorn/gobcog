@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import asyncio
 import logging
 import time
 from operator import itemgetter
-from typing import List, Literal, Optional
+from typing import List, Optional
 
 import discord
 from beautifultable import ALIGN_LEFT, BeautifulTable
@@ -11,15 +10,13 @@ from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
 from redbot.core.utils.chat_formatting import box, humanize_list, humanize_number
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import ReactionPredicate
 
 from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER
 from .converters import EquipableItemConverter, EquipmentConverter, SkillConverter
-from .helpers import _title_case, escape, smart_embed
+from .helpers import ConfirmView, _title_case, escape, smart_embed
 from .menus import BaseMenu, SimpleSource
 
 _ = Translator("Adventure", __file__)
@@ -77,7 +74,8 @@ class CharacterCommands(AdventureMixin):
                             author=ctx.author, name=await bank.get_currency_name(ctx.guild)
                         ),
                     )
-                nv_msg = await ctx.send(
+                view = ConfirmView(60, ctx.author)
+                await ctx.send(
                     _(
                         "{author}, this will cost you at least {offering} {currency_name}.\n"
                         "You currently have {bal}. Do you want to proceed?"
@@ -86,17 +84,12 @@ class CharacterCommands(AdventureMixin):
                         offering=humanize_number(offering),
                         currency_name=currency_name,
                         bal=humanize_number(bal),
-                    )
+                    ),
+                    view=view,
                 )
-                start_adding_reactions(nv_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                pred = ReactionPredicate.yes_or_no(nv_msg, ctx.author)
-                try:
-                    await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                except asyncio.TimeoutError:
-                    await self._clear_react(nv_msg)
-                    return
+                await view.wait()
 
-                if pred.result:
+                if view.confirmed:
                     c.skill["pool"] += c.skill["att"] + c.skill["cha"] + c.skill["int"]
                     c.skill["att"] = 0
                     c.skill["cha"] = 0
