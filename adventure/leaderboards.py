@@ -85,7 +85,7 @@ class LeaderboardCommands(AdventureMixin):
                 source=LeaderboardSource(entries=rebirth_sorted),
                 delete_message_after=True,
                 clear_reactions_after=True,
-                timeout=60,
+                timeout=180,
                 cog=self,
                 show_global=show_global,
             ).start(ctx=ctx)
@@ -216,7 +216,7 @@ class LeaderboardCommands(AdventureMixin):
                 source=ScoreboardSource(entries=rebirth_sorted, stat="wins"),
                 delete_message_after=True,
                 clear_reactions_after=True,
-                timeout=60,
+                timeout=180,
                 cog=self,
                 show_global=show_global,
             ).start(ctx=ctx)
@@ -235,7 +235,7 @@ class LeaderboardCommands(AdventureMixin):
                 source=NVScoreboardSource(entries=rebirth_sorted),
                 delete_message_after=True,
                 clear_reactions_after=True,
-                timeout=60,
+                timeout=180,
             ).start(ctx=ctx)
         else:
             await smart_embed(ctx, _("There are no adventurers in the server."))
@@ -254,7 +254,7 @@ class LeaderboardCommands(AdventureMixin):
                 source=WeeklyScoreboardSource(entries=adventures, stat=stats.lower()),
                 delete_message_after=True,
                 clear_reactions_after=True,
-                timeout=60,
+                timeout=180,
             ).start(ctx=ctx)
         else:
             await smart_embed(ctx, _("No stats to show for this week."))

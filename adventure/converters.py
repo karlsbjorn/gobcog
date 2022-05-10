@@ -222,8 +222,35 @@ class ItemsConverter(Converter):
             return "single", [lookup[pred.result]]
 
 
-class ItemConverter(Converter):
-    async def convert(self, ctx, argument) -> Item:
+class ItemButton(discord.ui.Button):
+    def __init__(self, item: Item):
+        self.item = item
+        super().__init__(label=item.name)
+
+    async def callback(self, interaction: discord.Interaction):
+        self.view.selected_item = self.item
+        self.view.stop()
+        await interaction.response.edit_message(view=None)
+
+
+class ConfirmItemView(discord.ui.View):
+    def __init__(self, timeout: float, items: List[Item], author: discord.User):
+        super().__init__(timeout=timeout)
+        self.selected_item = None
+        for item in items:
+            self.add_item(ItemButton(item))
+        self.author = author
+
+    async def interaction_check(self, interaction: discord.Interaction):
+        if interaction.user.id != self.author.id:
+            await interaction.response.send_message(_("You are not authorized to interact with this."), ephemeral=True)
+            return False
+        return True
+
+
+class ItemConverter(Transformer):
+    @classmethod
+    async def convert(cls, ctx: commands.Context, argument: str) -> Item:
         try:
             c = await Character.from_json(
                 ctx,
@@ -257,27 +284,46 @@ class ItemConverter(Converter):
             raise BadArgument(_("`{}` doesn't seem to match any items you own.").format(argument))
         else:
             lookup = list(i for x, i in c.backpack.items() if str(i) in _temp_items)
-            if len(lookup) > 10:
+            if len(lookup) > 25:
                 raise BadArgument(
                     _("You have too many items matching the name `{}`, please be more specific.").format(argument)
                 )
             items = ""
+            view = ConfirmItemView(60, lookup, ctx.author)
             for (number, item) in enumerate(lookup):
                 items += f"{number}. {str(item)} (owned {item.owned})\n"
 
-            msg = await ctx.send(
+            await ctx.send(
                 _("Multiple items share that name, which one would you like?\n{items}").format(
                     items=box(items, lang="css")
-                )
+                ),
+                view=view,
             )
-            emojis = ReactionPredicate.NUMBER_EMOJIS[: len(lookup)]
-            start_adding_reactions(msg, emojis)
-            pred = ReactionPredicate.with_emojis(emojis, msg, user=ctx.author)
-            try:
-                await ctx.bot.wait_for("reaction_add", check=pred, timeout=30)
-            except asyncio.TimeoutError:
+            await view.wait()
+            if not view.selected_item:
                 raise BadArgument(_("Alright then."))
-            return lookup[pred.result]
+            return view.selected_item
+
+    @classmethod
+    async def transform(cls, interaction: discord.Interaction, argument: str) -> Item:
+        ctx = await interaction.client.get_context(interaction)
+        return await cls.convert(ctx, argument)
+
+    async def autocomplete(self, interaction: discord.Interaction, current: str) -> List[Choice]:
+        ctx = await interaction.client.get_context(interaction)
+        try:
+            c = await Character.from_json(
+                ctx,
+                ctx.bot.get_cog("Adventure").config,
+                ctx.author,
+                ctx.bot.get_cog("Adventure")._daily_bonus,
+            )
+        except Exception as exc:
+            log.exception("Error with the new character sheet", exc_info=exc)
+            return []
+        return [Choice(name=str(x), value=x.name) for i, x in c.backpack.items() if current.lower() in str(x).lower()][
+            :25
+        ]
 
 
 class EquipableItemConverter(Transformer):

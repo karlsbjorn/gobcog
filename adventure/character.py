@@ -272,7 +272,7 @@ class CharacterCommands(AdventureMixin):
             source=SimpleSource(msg_list),
             delete_message_after=True,
             clear_reactions_after=True,
-            timeout=60,
+            timeout=180,
         ).start(ctx=ctx)
 
     @set_show.autocomplete("set_name")
@@ -371,7 +371,7 @@ class CharacterCommands(AdventureMixin):
             source=SimpleSource([box(c, lang="css"), *msgs]),
             delete_message_after=True,
             clear_reactions_after=True,
-            timeout=60,
+            timeout=180,
         ).start(ctx=ctx)
 
     async def _build_loadout_display(

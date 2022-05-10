@@ -12,8 +12,7 @@ from discord.ext.commands.errors import BadArgument
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import box, humanize_list, humanize_number, humanize_timedelta
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
+from redbot.core.utils.predicates import MessagePredicate
 
 from .abc import AdventureMixin
 from .bank import bank

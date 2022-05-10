@@ -353,10 +353,6 @@ class AdventureMixin(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    async def _backpack_sell_button_action(self, ctx, emoji, page, item, price_shown, character):
-        raise NotImplementedError()
-
-    @abstractmethod
     async def backpack_trade(
         self,
         ctx: commands.Context,

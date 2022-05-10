@@ -225,7 +225,7 @@ class ScoreboardSource(WeeklyScoreboardSource):
             ),
         )
         embed.set_footer(text=f"Page {menu.current_page + 1}/{self.get_max_pages()}")
-        return {"embed": embed, "content": self._legend}
+        return embed
 
 
 class NVScoreboardSource(WeeklyScoreboardSource):
@@ -447,7 +447,7 @@ class BaseMenu(discord.ui.View):
         source: menus.PageSource,
         clear_reactions_after: bool = True,
         delete_message_after: bool = False,
-        timeout: int = 60,
+        timeout: int = 180,
         message: discord.Message = None,
         **kwargs: Any,
     ) -> None:
@@ -499,7 +499,14 @@ class BaseMenu(discord.ui.View):
             await source._prepare_once()
             await self.show_page(0, interaction)
 
-    async def start(self, ctx, *, channel=None, wait=False, page: int = 0):
+    async def start(
+        self,
+        ctx: Optional[commands.Context],
+        *,
+        wait=False,
+        page: int = 0,
+        interaction: Optional[discord.Interaction] = None,
+    ):
         """
         Starts the interactive menu session.
 
@@ -521,14 +528,18 @@ class BaseMenu(discord.ui.View):
         discord.HTTPException
             Adding a reaction failed.
         """
-        self.bot = ctx.bot
+        if ctx is not None:
+            self.bot = ctx.bot
+            self._author_id = ctx.author.id
+        elif interaction is not None:
+            self.bot = interaction.client
+            self._author_id = interaction.user.id
         self.ctx = ctx
-        self._author_id = ctx.author.id
-        me = ctx.me
-        self.__me = discord.Object(id=me.id)
         msg = self.message
         if msg is None:
-            self.message = await self.send_initial_message(ctx, page=page)
+            self.message = await self.send_initial_message(ctx, page=page, interaction=interaction)
+        if wait:
+            return await self.wait()
 
     async def _get_kwargs_from_page(self, page: Any):
         value = await self.source.format_page(self, page)
@@ -546,7 +557,9 @@ class BaseMenu(discord.ui.View):
         kwargs = await self._get_kwargs_from_page(page)
         await interaction.response.edit_message(**kwargs, view=self)
 
-    async def send_initial_message(self, ctx: commands.Context, page: int = 0):
+    async def send_initial_message(
+        self, ctx: Optional[commands.Context], page: int = 0, interaction: Optional[discord.Interaction] = None
+    ):
         """
 
         The default implementation of :meth:`Menu.send_initial_message`
@@ -557,7 +570,11 @@ class BaseMenu(discord.ui.View):
         self.current_page = page
         page = await self._source.get_page(page)
         kwargs = await self._get_kwargs_from_page(page)
-        return await ctx.send(**kwargs, view=self)
+        if ctx is None and interaction is not None:
+            await interaction.response.send_message(**kwargs, view=self)
+            return await interaction.original_message()
+        else:
+            return await ctx.send(**kwargs, view=self)
 
     async def show_checked_page(self, page_number: int, interaction: discord.Interaction) -> None:
         max_pages = self._source.get_max_pages()
@@ -589,7 +606,7 @@ class ScoreBoardMenu(BaseMenu):
         cog: Optional[commands.Cog] = None,
         clear_reactions_after: bool = True,
         delete_message_after: bool = False,
-        timeout: int = 60,
+        timeout: int = 180,
         message: discord.Message = None,
         show_global: bool = False,
         current_scoreboard: str = "wins",
@@ -607,7 +624,9 @@ class ScoreBoardMenu(BaseMenu):
         self.show_global = show_global
         self._current = current_scoreboard
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{FACE WITH PARTY HORN AND PARTY HAT}", row=1)
+    @discord.ui.button(
+        label=_("Wins"), style=discord.ButtonStyle.grey, emoji="\N{FACE WITH PARTY HORN AND PARTY HAT}", row=1
+    )
     async def wins(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "wins":
             return
@@ -619,7 +638,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{FIRE}", row=1)
+    @discord.ui.button(label=_("Losses"), style=discord.ButtonStyle.grey, emoji="\N{FIRE}", row=1)
     async def losses(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "loses":
             return
@@ -631,7 +650,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{DAGGER KNIFE}", row=1)
+    @discord.ui.button(label=_("Physical"), style=discord.ButtonStyle.grey, emoji="\N{DAGGER KNIFE}", row=1)
     async def physical(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         """stops the pagination session."""
         if self._current == "fight":
@@ -644,7 +663,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{SPARKLES}", row=1)
+    @discord.ui.button(label=_("Magic"), style=discord.ButtonStyle.grey, emoji="\N{SPARKLES}", row=1)
     async def magic(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "spell":
             return
@@ -656,7 +675,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{LEFT SPEECH BUBBLE}", row=1)
+    @discord.ui.button(label=_("Charisma"), style=discord.ButtonStyle.grey, emoji="\N{LEFT SPEECH BUBBLE}", row=1)
     async def diplomacy(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "talk":
             return
@@ -668,7 +687,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{PERSON WITH FOLDED HANDS}", row=2)
+    @discord.ui.button(label=_("Pray"), style=discord.ButtonStyle.grey, emoji="\N{PERSON WITH FOLDED HANDS}", row=2)
     async def praying(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "pray":
             return
@@ -680,7 +699,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{RUNNER}", row=2)
+    @discord.ui.button(label=_("Run"), style=discord.ButtonStyle.grey, emoji="\N{RUNNER}", row=2)
     async def runner(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "run":
             return
@@ -692,7 +711,7 @@ class ScoreBoardMenu(BaseMenu):
             source=ScoreboardSource(entries=rebirth_sorted, stat=self._current), interaction=interaction
         )
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{EXCLAMATION QUESTION MARK}", row=2)
+    @discord.ui.button(label=_("Fumbles"), style=discord.ButtonStyle.grey, emoji="\N{EXCLAMATION QUESTION MARK}", row=2)
     async def fumble(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "fumbles":
             return
@@ -712,7 +731,7 @@ class LeaderboardMenu(BaseMenu):
         cog: Optional[commands.Cog] = None,
         clear_reactions_after: bool = True,
         delete_message_after: bool = False,
-        timeout: int = 60,
+        timeout: int = 180,
         message: discord.Message = None,
         show_global: bool = False,
         current_scoreboard: str = "leaderboard",
@@ -746,7 +765,9 @@ class LeaderboardMenu(BaseMenu):
     def _unified_bank(self):
         return not self.cog._separate_economy
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{CHART WITH UPWARDS TREND}", row=1)
+    @discord.ui.button(
+        label=_("Leaderboard"), style=discord.ButtonStyle.grey, emoji="\N{CHART WITH UPWARDS TREND}", row=1
+    )
     async def home(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "leaderboard":
             return
@@ -754,7 +775,7 @@ class LeaderboardMenu(BaseMenu):
         rebirth_sorted = await self.cog.get_leaderboard(guild=self.ctx.guild if not self.show_global else None)
         await self.change_source(source=LeaderboardSource(entries=rebirth_sorted), interaction=interaction)
 
-    @discord.ui.button(style=discord.ButtonStyle.grey, emoji="\N{MONEY WITH WINGS}", row=1)
+    @discord.ui.button(label=_("Economy"), style=discord.ButtonStyle.grey, emoji="\N{MONEY WITH WINGS}", row=1)
     async def economy(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "economy":
             return
@@ -772,7 +793,7 @@ class BackpackMenu(BaseMenu):
         help_command: commands.Command,
         clear_reactions_after: bool = True,
         delete_message_after: bool = False,
-        timeout: int = 60,
+        timeout: int = 180,
         message: discord.Message = None,
         **kwargs: Any,
     ) -> None:
@@ -792,3 +813,5 @@ class BackpackMenu(BaseMenu):
         await self.ctx.send_help(self.__help_command)
         self.delete_message_after = True
         self.stop()
+        await interaction.response.defer()
+        await self.on_timeout()
