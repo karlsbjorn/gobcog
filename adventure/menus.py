@@ -499,6 +499,16 @@ class BaseMenu(discord.ui.View):
             await source._prepare_once()
             await self.show_page(0, interaction)
 
+    async def update(self):
+        """
+        Define this here so that subclasses can utilize this hook
+        and update the state of the view before sending.
+        This is useful for modifying disabled buttons etc.
+
+        This gets called after the page has been formatted.
+        """
+        pass
+
     async def start(
         self,
         ctx: Optional[commands.Context],
@@ -528,6 +538,7 @@ class BaseMenu(discord.ui.View):
         discord.HTTPException
             Adding a reaction failed.
         """
+
         if ctx is not None:
             self.bot = ctx.bot
             self._author_id = ctx.author.id
@@ -555,6 +566,7 @@ class BaseMenu(discord.ui.View):
         page = await self.source.get_page(page_number)
         self.current_page = page_number
         kwargs = await self._get_kwargs_from_page(page)
+        await self.update()
         await interaction.response.edit_message(**kwargs, view=self)
 
     async def send_initial_message(
@@ -570,6 +582,7 @@ class BaseMenu(discord.ui.View):
         self.current_page = page
         page = await self._source.get_page(page)
         kwargs = await self._get_kwargs_from_page(page)
+        await self.update()
         if ctx is None and interaction is not None:
             await interaction.response.send_message(**kwargs, view=self)
             return await interaction.original_message()
@@ -624,11 +637,34 @@ class ScoreBoardMenu(BaseMenu):
         self.show_global = show_global
         self._current = current_scoreboard
 
+    async def update(self):
+        buttons = {
+            "wins": self.wins,
+            "losses": self.losses,
+            "fight": self.physical,
+            "spell": self.magic,
+            "talk": self.diplomacy,
+            "pray": self.praying,
+            "run": self.runner,
+            "fumble": self.fumble,
+        }
+        for button in buttons.values():
+            button.disabled = False
+        buttons[self._current].disabled = True
+
     @discord.ui.button(
-        label=_("Wins"), style=discord.ButtonStyle.grey, emoji="\N{FACE WITH PARTY HORN AND PARTY HAT}", row=1
+        label=_("Wins"),
+        style=discord.ButtonStyle.grey,
+        emoji="\N{FACE WITH PARTY HORN AND PARTY HAT}",
+        row=1,
+        disabled=True,
     )
     async def wins(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "wins":
+            await interaction.response.defer()
+            # this deferal is unnecessary now since the buttons are just disabled
+            # however, in the event that the button gets passed and the state is not
+            # as we expect at least try not to send the user an interaction failed message
             return
         self._current = "wins"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -641,6 +677,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Losses"), style=discord.ButtonStyle.grey, emoji="\N{FIRE}", row=1)
     async def losses(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "loses":
+            await interaction.response.defer()
             return
         self._current = "loses"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -654,6 +691,7 @@ class ScoreBoardMenu(BaseMenu):
     async def physical(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         """stops the pagination session."""
         if self._current == "fight":
+            await interaction.response.defer()
             return
         self._current = "fight"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -666,6 +704,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Magic"), style=discord.ButtonStyle.grey, emoji="\N{SPARKLES}", row=1)
     async def magic(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "spell":
+            await interaction.response.defer()
             return
         self._current = "spell"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -678,6 +717,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Charisma"), style=discord.ButtonStyle.grey, emoji="\N{LEFT SPEECH BUBBLE}", row=1)
     async def diplomacy(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "talk":
+            await interaction.response.defer()
             return
         self._current = "talk"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -690,6 +730,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Pray"), style=discord.ButtonStyle.grey, emoji="\N{PERSON WITH FOLDED HANDS}", row=2)
     async def praying(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "pray":
+            await interaction.response.defer()
             return
         self._current = "pray"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -702,6 +743,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Run"), style=discord.ButtonStyle.grey, emoji="\N{RUNNER}", row=2)
     async def runner(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "run":
+            await interaction.response.defer()
             return
         self._current = "run"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -714,6 +756,7 @@ class ScoreBoardMenu(BaseMenu):
     @discord.ui.button(label=_("Fumbles"), style=discord.ButtonStyle.grey, emoji="\N{EXCLAMATION QUESTION MARK}", row=2)
     async def fumble(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "fumbles":
+            await interaction.response.defer()
             return
         self._current = "fumbles"
         rebirth_sorted = await self.cog.get_global_scoreboard(
@@ -749,27 +792,25 @@ class LeaderboardMenu(BaseMenu):
         self.show_global = show_global
         self._current = current_scoreboard
 
-    def _skip_single_arrows(self):
-        max_pages = self._source.get_max_pages()
-        if max_pages is None:
-            return True
-        return max_pages == 1
-
-    def _skip_double_triangle_buttons(self):
-        max_pages = self._source.get_max_pages()
-
-        if max_pages is None:
-            return True
-        return max_pages <= 2
+    async def update(self):
+        buttons = {"leaderboard": self.home, "economy": self.economy}
+        for button in buttons.values():
+            button.disabled = False
+        buttons[self._current].disabled = True
 
     def _unified_bank(self):
         return not self.cog._separate_economy
 
     @discord.ui.button(
-        label=_("Leaderboard"), style=discord.ButtonStyle.grey, emoji="\N{CHART WITH UPWARDS TREND}", row=1
+        label=_("Leaderboard"),
+        style=discord.ButtonStyle.grey,
+        emoji="\N{CHART WITH UPWARDS TREND}",
+        row=1,
+        disabled=True,
     )
     async def home(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "leaderboard":
+            await interaction.response.defer()
             return
         self._current = "leaderboard"
         rebirth_sorted = await self.cog.get_leaderboard(guild=self.ctx.guild if not self.show_global else None)
@@ -778,6 +819,7 @@ class LeaderboardMenu(BaseMenu):
     @discord.ui.button(label=_("Economy"), style=discord.ButtonStyle.grey, emoji="\N{MONEY WITH WINGS}", row=1)
     async def economy(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if self._current == "economy":
+            await interaction.response.defer()
             return
         self._current = "economy"
         bank_sorted = await bank.get_leaderboard(
