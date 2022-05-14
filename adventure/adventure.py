@@ -2558,7 +2558,7 @@ class Adventure(
             usercp = int(usercp * (c.gear_set_bonus.get("cpmult", 1) + daymult))
             newcp += usercp
             roll = temp.get(user.id, {}).get("roll")
-            userxp = int(per_participant_xp)
+            userxp = int(per_participant_xp) * 10
             if roll == 5 and c.heroclass["name"] == "Ranger" and c.heroclass["pet"]:
                 petxp = int(userxp * c.heroclass["pet"]["bonus"])
                 newxp += petxp
