@@ -2545,6 +2545,7 @@ class Adventure(
                 petxp = int(userxp * c.heroclass["pet"]["bonus"])
                 total_adventure_xp += petxp
                 userxp += petxp
+        total_adventure_xp = total_adventure_xp * 10
         newxp = total_adventure_xp
         per_participant_xp = total_adventure_xp / len(userlist)
         async for user in AsyncIter(userlist, steps=100):
@@ -2558,7 +2559,7 @@ class Adventure(
             usercp = int(usercp * (c.gear_set_bonus.get("cpmult", 1) + daymult))
             newcp += usercp
             roll = temp.get(user.id, {}).get("roll")
-            userxp = int(per_participant_xp) * 10
+            userxp = int(per_participant_xp)
             if roll == 5 and c.heroclass["name"] == "Ranger" and c.heroclass["pet"]:
                 petxp = int(userxp * c.heroclass["pet"]["bonus"])
                 newxp += petxp
