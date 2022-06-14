@@ -9,7 +9,7 @@ from abc import ABC
 from collections import defaultdict
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Literal, MutableMapping, Union
+from typing import Literal, MutableMapping, Optional, Union
 
 import discord
 from discord.ext.commands import CheckFailure
@@ -28,11 +28,11 @@ from .adventureresult import AdventureResults
 from .adventureset import AdventureSetCommands
 from .backpack import BackPackCommands
 from .bank import bank
-from .cart import AdventureCart
+from .cart import Trader
 from .character import CharacterCommands
 from .charsheet import Character, calculate_sp, has_funds
 from .class_abilities import ClassAbilities
-from .converters import ArgParserFailure
+from .converters import ArgParserFailure, ChallengeConverter
 from .defaults import default_global, default_guild, default_user
 from .dev import DevCommands
 from .economy import EconomyCommands
@@ -69,7 +69,6 @@ class Adventure(
     BackPackCommands,
     CharacterCommands,
     ClassAbilities,
-    AdventureCart,
     DevCommands,
     EconomyCommands,
     LeaderboardCommands,
@@ -78,7 +77,7 @@ class Adventure(
     Negaverse,
     RebirthCommands,
     ThemesetCommands,
-    commands.Cog,
+    commands.GroupCog,
     metaclass=CompositeMetaClass,
 ):
     """Adventure, derived from the Goblins Adventure cog by locastan."""
@@ -189,6 +188,7 @@ class Adventure(
         self.MONSTER_NOW: dict = None
         self.LOCATIONS: list = None
         self.PETS: dict = None
+        self.ACTION_RESPONSE: dict = None
 
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
@@ -197,6 +197,12 @@ class Adventure(
         log.debug("Creating Task")
         self._init_task = self.bot.loop.create_task(self.initialize())
         self._ready_event = asyncio.Event()
+        # This is done to prevent having a top level text command named "start"
+        # in order to keep the slash command variant called `/adventure start`
+        # which is a lot better than `/adventure adventure`
+        self.app_command.remove_command("adventure")
+        self._adventure.app_command.name = "start"
+        self.app_command.add_command(self._adventure.app_command)
 
     async def cog_before_invoke(self, ctx: commands.Context):
         await self._ready_event.wait()
@@ -234,6 +240,7 @@ class Adventure(
             equipment_fp = get_path(self) / f"{theme}" / "equipment.json"
             suffixes_fp = get_path(self) / f"{theme}" / "suffixes.json"
             set_bonuses = get_path(self) / f"{theme}" / "set_bonuses.json"
+            action_response = get_path(self) / f"{theme}" / "action_response.json"
             files = {
                 "pets": pets_fp,
                 "attr": attribs_fp,
@@ -248,6 +255,7 @@ class Adventure(
                 "equipment": equipment_fp,
                 "suffixes": suffixes_fp,
                 "set_bonuses": set_bonuses,
+                "action_response": action_response,
             }
             for (name, file) in files.items():
                 if not file.exists():
@@ -279,6 +287,8 @@ class Adventure(
                 self.SUFFIXES = json.load(f)
             with files["set_bonuses"].open("r") as f:
                 self.SET_BONUSES = json.load(f)
+            with files["action_response"].open("r") as f:
+                self.ACTION_RESPONSE = json.load(f)
 
             if not all(
                 i
@@ -495,15 +505,15 @@ class Adventure(
                 await asyncio.sleep(5)
 
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.guild)
-    @commands.command(name="adventure", aliases=["a"])
+    @commands.hybrid_command(name="adventure", aliases=["a"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.guild_only()
-    async def _adventure(self, ctx: commands.Context, *, challenge=None):
+    async def _adventure(self, ctx: commands.Context, *, challenge: Optional[ChallengeConverter] = None):
         """This will send you on an adventure!
 
         You play by reacting with the offered emojis.
         """
-
+        await ctx.defer()
         if ctx.guild.id in self._sessions and self._sessions[ctx.guild.id].finished is False:
             adventure_obj = self._sessions[ctx.guild.id]
             link = adventure_obj.message.jump_url
@@ -538,12 +548,10 @@ class Adventure(
         cooldown_time = guild_settings["cooldown_timer_manual"]
 
         if cooldown + cooldown_time > time.time():
-            cooldown_time = cooldown + cooldown_time - time.time()
+            cooldown_time = int(cooldown + cooldown_time)
             return await smart_embed(
                 ctx,
-                _("Nijedan heroj nije spreman krenuti u avanturu, pokušaj ponovno za {}.").format(
-                    humanize_timedelta(seconds=int(cooldown_time)) if int(cooldown_time) >= 1 else _("1 sekundu")
-                ),
+                _("Nijedan heroj nije spreman krenuti u avanturu, pokušaj ponovno za <t:{}:R>.").format(cooldown_time),
             )
 
         if challenge and not (is_dev(ctx.author) or await ctx.bot.is_owner(ctx.author)):
@@ -868,6 +876,7 @@ class Adventure(
             no_monster = random.randint(0, 100) == 25
         self._sessions[ctx.guild.id] = GameSession(
             ctx=ctx,
+            cog=self,
             challenge=new_challenge if not no_monster else None,
             attribute=attribute if not no_monster else None,
             guild=ctx.guild,
@@ -940,9 +949,9 @@ class Adventure(
                     embed.colour = discord.Colour.dark_red()
                     if session.monster["image"]:
                         embed.set_image(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{dragon_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{dragon_text}", view=session)
                 timeout = 60 * 5
 
             elif session.miniboss:
@@ -951,18 +960,18 @@ class Adventure(
                     embed.colour = discord.Colour.dark_green()
                     if session.monster["image"]:
                         embed.set_image(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{basilisk_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{basilisk_text}", view=session)
                 timeout = 60 * 3
             else:
                 if use_embeds:
                     embed.description = f"{adventure_msg}\n{normal_text}"
                     if session.monster["image"]:
                         embed.set_thumbnail(url=session.monster["image"])
-                    adventure_msg = await ctx.send(embed=embed)
+                    adventure_msg = await ctx.send(embed=embed, view=session)
                 else:
-                    adventure_msg = await ctx.send(f"{adventure_msg}\n{normal_text}")
+                    adventure_msg = await ctx.send(f"{adventure_msg}\n{normal_text}", view=session)
                 timeout = 60 * 2
         else:
             embed = discord.Embed(colour=discord.Colour.blurple())
@@ -978,13 +987,13 @@ class Adventure(
             )
             if use_embeds:
                 embed.description = f"{adventure_msg}\n{obscured_text}"
-                adventure_msg = await ctx.send(embed=embed)
+                adventure_msg = await ctx.send(embed=embed, view=session)
             else:
-                adventure_msg = await ctx.send(f"{adventure_msg}\n{obscured_text}")
+                adventure_msg = await ctx.send(f"{adventure_msg}\n{obscured_text}", view=session)
 
         session.message_id = adventure_msg.id
         session.message = adventure_msg
-        start_adding_reactions(adventure_msg, self._adventure_actions)
+        # start_adding_reactions(adventure_msg, self._adventure_actions)
         timer = await self._adv_countdown(ctx, session.timer, "Preostalo vrijeme")
         self.tasks[adventure_msg.id] = timer
         try:
@@ -994,6 +1003,7 @@ class Adventure(
         except Exception as exc:
             timer.cancel()
             log.exception("Error with the countdown timer", exc_info=exc)
+        await adventure_msg.edit(view=None)
 
         return await self._result(ctx, adventure_msg)
 
@@ -1057,14 +1067,6 @@ class Adventure(
                     (timer, done, sremain) = self._adventure_countdown[guild.id]
                     if sremain > 3:
                         await self._handle_adventure(reaction, user)
-        if guild.id in self._current_traders:
-            if reaction.message.id == self._current_traders[guild.id]["msg"] and not self.in_adventure(user=user):
-                if user in self._current_traders[guild.id]["users"]:
-                    return
-                if guild.id in self._trader_countdown:
-                    (timer, done, sremain) = self._trader_countdown[guild.id]
-                    if sremain > 3:
-                        await self._handle_cart(reaction, user)
 
     async def _handle_adventure(self, reaction: discord.Reaction, user: discord.Member):
         action = {v: k for k, v in self._adventure_controls.items()}[str(reaction.emoji)]
@@ -2378,32 +2380,6 @@ class Adventure(
 
         return ctx.bot.loop.create_task(adv_countdown())
 
-    async def _cart_countdown(self, ctx: commands.Context, seconds, title, room=None) -> asyncio.Task:
-        room = room or ctx
-        await self._data_check(ctx)
-
-        async def cart_countdown():
-            secondint = int(seconds)
-            cart_end = await _get_epoch(secondint)
-            timer, done, sremain = await _remaining(cart_end)
-            message_cart = await room.send(f"⏳ [{title}] {timer}s")
-            deleted = False
-            while not done:
-                timer, done, sremain = await _remaining(cart_end)
-                self._trader_countdown[ctx.guild.id] = (timer, done, sremain)
-                if done:
-                    if not deleted:
-                        await message_cart.delete()
-                    break
-                if not deleted and int(sremain) % 5 == 0:
-                    try:
-                        await message_cart.edit(content=f"⏳ [{title}] {timer}s")
-                    except discord.NotFound:
-                        deleted = True
-                await asyncio.sleep(1)
-
-        return ctx.bot.loop.create_task(cart_countdown())
-
     async def _data_check(self, ctx: commands.Context):
         try:
             self._adventure_countdown[ctx.guild.id]
@@ -2442,7 +2418,12 @@ class Adventure(
                 ctx = await self.bot.get_context(message)
                 ctx.command = self.makecart
                 await asyncio.sleep(5)
-                await self._trader(ctx)
+                timeout = await self.config.guild(ctx.guild).cart_timeout()
+                trader = Trader(timeout, ctx, self)
+                await trader.start(ctx)
+                await asyncio.sleep(timeout)
+                trader.stop()
+                await trader.on_timeout()
 
     async def _roll_chest(self, chest_type: str, c: Character):
         # set rarity to chest by default

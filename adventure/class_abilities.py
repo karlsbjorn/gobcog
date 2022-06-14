@@ -5,21 +5,21 @@ import logging
 import random
 import time
 from math import ceil
+from typing import Literal, Optional
 
 import discord
 from discord.ext.commands.errors import BadArgument
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import box, humanize_list, humanize_number, humanize_timedelta
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
+from redbot.core.utils.predicates import MessagePredicate
 
 from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER
-from .converters import ItemConverter
-from .helpers import escape, is_dev, smart_embed
+from .converters import HeroClassConverter, ItemConverter
+from .helpers import ConfirmView, escape, is_dev, smart_embed
 from .menus import BaseMenu, SimpleSource
 
 _ = Translator("Adventure", __file__)
@@ -30,10 +30,13 @@ log = logging.getLogger("red.cogs.adventure")
 class ClassAbilities(AdventureMixin):
     """This class will handle class abilities"""
 
-    @commands.command(cooldown_after_parsing=True)
+    @commands.hybrid_command(cooldown_after_parsing=True)
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(rate=1, per=7200, type=commands.BucketType.user)
-    async def heroclass(self, ctx: commands.Context, clz: str = None, action: str = None):
+    @discord.app_commands.rename(clz="class")
+    async def heroclass(
+        self, ctx: commands.Context, clz: Optional[HeroClassConverter] = None, action: Optional[Literal["info"]] = None
+    ):
         """Allows you to select a class if you are level 10 or above.
 
         For information on class use: `[p]heroclass classname info`.
@@ -166,6 +169,7 @@ class ClassAbilities(AdventureMixin):
                     if clz == "Psychic" and c.rebirths < 20:
                         ctx.command.reset_cooldown(ctx)
                         return await smart_embed(ctx, _("You are too inexperienced to become a {}.").format(clz))
+                    view = ConfirmView(60, ctx.author)
                     class_msg = await ctx.send(
                         box(
                             _("This will cost {spend} {currency_name}. Do you want to continue, {author}?").format(
@@ -174,7 +178,8 @@ class ClassAbilities(AdventureMixin):
                                 author=escape(ctx.author.display_name),
                             ),
                             lang="css",
-                        )
+                        ),
+                        view=view,
                     )
                     broke = box(
                         _("You don't have enough {currency_name} to train to be a {clz}.").format(
@@ -182,16 +187,8 @@ class ClassAbilities(AdventureMixin):
                         ),
                         lang="css",
                     )
-                    start_adding_reactions(class_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                    pred = ReactionPredicate.yes_or_no(class_msg, ctx.author)
-                    try:
-                        await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                    except asyncio.TimeoutError:
-                        await self._clear_react(class_msg)
-                        ctx.command.reset_cooldown(ctx)
-                        return
-
-                    if not pred.result:
+                    await view.wait()
+                    if not view.confirmed:
                         await class_msg.edit(
                             content=box(
                                 _("{author} decided to continue being a {h_class}.").format(
@@ -219,6 +216,7 @@ class ClassAbilities(AdventureMixin):
                     )
                     if c.lvl >= 10:
                         if c.heroclass["name"] == "Tinkerer" or c.heroclass["name"] == "Ranger":
+                            view = ConfirmView(60, ctx.author)
                             if c.heroclass["name"] == "Tinkerer":
                                 await self._clear_react(class_msg)
                                 await class_msg.edit(
@@ -228,7 +226,8 @@ class ClassAbilities(AdventureMixin):
                                             "device if you change your class.\nShall I proceed?"
                                         ).format(escape(ctx.author.display_name)),
                                         lang="css",
-                                    )
+                                    ),
+                                    view=view,
                                 )
                             else:
                                 await self._clear_react(class_msg)
@@ -238,17 +237,14 @@ class ClassAbilities(AdventureMixin):
                                             "{}, you will lose your pet if you change your class.\nShall I proceed?"
                                         ).format(escape(ctx.author.display_name)),
                                         lang="css",
-                                    )
+                                    ),
+                                    view=view,
                                 )
-                            start_adding_reactions(class_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                            pred = ReactionPredicate.yes_or_no(class_msg, ctx.author)
-                            try:
-                                await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                            except asyncio.TimeoutError:
-                                await self._clear_react(class_msg)
+                            await view.wait()
+                            if view.confirmed is None:
                                 ctx.command.reset_cooldown(ctx)
                                 return
-                            if pred.result:  # user reacted with Yes.
+                            if view.confirmed:  # user reacted with Yes.
                                 tinker_wep = []
                                 for item in c.get_current_equipment():
                                     if item.rarity == "forged":
@@ -342,7 +338,7 @@ class ClassAbilities(AdventureMixin):
                             ),
                         )
 
-    @commands.group(autohelp=False)
+    @commands.hybrid_group(autohelp=False, fallback="find")
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     async def pet(self, ctx: commands.Context):
         """[Ranger Class Only]
@@ -565,7 +561,7 @@ class ClassAbilities(AdventureMixin):
             else:
                 return await ctx.send(box(_("You don't have a pet."), lang="css"))
 
-    @commands.command()
+    @commands.hybrid_command()
     async def bless(self, ctx: commands.Context):
         """[Cleric Class Only]
 
@@ -616,7 +612,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.guild_only()
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def insight(self, ctx: commands.Context):
@@ -795,7 +791,7 @@ class ClassAbilities(AdventureMixin):
                     ),
                 )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def rage(self, ctx: commands.Context):
         """[Berserker Class Only]
 
@@ -846,7 +842,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def focus(self, ctx: commands.Context):
         """[Wizard Class Only]
 
@@ -897,7 +893,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def convoke(self, ctx: commands.Context):
         """[Druid Class Only]
 
@@ -949,7 +945,7 @@ class ClassAbilities(AdventureMixin):
                         ),
                     )
 
-    @commands.command()
+    @commands.hybrid_command()
     async def music(self, ctx: commands.Context):
         """[Bard Class Only]
 
@@ -1000,9 +996,9 @@ class ClassAbilities(AdventureMixin):
                     )
 
     @commands.max_concurrency(1, per=commands.BucketType.user)
-    @commands.command()
+    @commands.hybrid_command()
     @commands.bot_has_permissions(add_reactions=True)
-    async def forge(self, ctx):
+    async def forge(self, ctx: commands.Context):
         """[Tinkerer Class Only]
 
         This allows a Tinkerer to forge two items into a device. (1h cooldown)
@@ -1050,12 +1046,13 @@ class ClassAbilities(AdventureMixin):
                     )
                 pages = await c.get_backpack(forging=True, clean=True)
                 if not pages:
-                    return await smart_embed(
+                    await smart_embed(
                         ctx,
                         _("**{}**, you need at least two forgeable items in your backpack to forge.").format(
                             escape(ctx.author.display_name)
                         ),
                     )
+                    return
                 await BaseMenu(
                     source=SimpleSource(pages),
                     delete_message_after=True,
@@ -1187,17 +1184,12 @@ class ClassAbilities(AdventureMixin):
                         ),
                         lang="css",
                     )
-                    forge_msg = await ctx.send(forge_str)
-                    start_adding_reactions(forge_msg, ReactionPredicate.YES_OR_NO_EMOJIS)
-                    pred = ReactionPredicate.yes_or_no(forge_msg, ctx.author)
-                    try:
-                        await ctx.bot.wait_for("reaction_add", check=pred, timeout=60)
-                    except asyncio.TimeoutError:
-                        await self._clear_react(forge_msg)
-                        return
+                    view = ConfirmView(60, ctx.author)
+                    forge_msg = await ctx.send(forge_str, view=view)
+                    await view.wait()
                     with contextlib.suppress(discord.HTTPException):
                         await forge_msg.delete()
-                    if pred.result:  # user reacted with Yes.
+                    if view.confirmed:  # user reacted with Yes.
                         c.heroclass["cooldown"] = time.time() + cooldown_time
                         created_item = box(
                             _("{author}, your new {newitem} consumed {lk} and is now lurking in your backpack.").format(

@@ -3,6 +3,7 @@ import asyncio
 import logging
 import random
 import time
+from typing import Literal, Optional
 
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from redbot.core import commands
@@ -10,14 +11,12 @@ from redbot.core.errors import BalanceTooHigh
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter
 from redbot.core.utils.chat_formatting import box, humanize_number
-from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import ReactionPredicate
 
 from .abc import AdventureMixin
 from .bank import bank
 from .charsheet import Character, Item
 from .constants import ORDER, RARITIES
-from .helpers import _sell, escape, is_dev, smart_embed
+from .helpers import LootView, _sell, escape, is_dev, smart_embed
 from .menus import BaseMenu, SimpleSource
 
 _ = Translator("Adventure", __file__)
@@ -28,14 +27,20 @@ log = logging.getLogger("red.cogs.adventure")
 class LootCommands(AdventureMixin):
     """This class will handle Loot interactions"""
 
-    @commands.command()
+    @commands.hybrid_command(name="loot")
     @commands.bot_has_permissions(add_reactions=True)
     @commands.cooldown(rate=1, per=4, type=commands.BucketType.user)
-    async def loot(self, ctx: commands.Context, box_type: str = None, number: int = 1):
+    async def loot(
+        self,
+        ctx: commands.Context,
+        box_type: Optional[Literal["normal", "rare", "epic", "legendary", "ascended", "set"]] = None,
+        number: int = 1,
+    ):
         """This opens one of your precious treasure chests.
 
         Use the box rarity type with the command: normal, rare, epic, legendary, ascended or set.
         """
+        await ctx.defer()
         if (not is_dev(ctx.author) and number > 100) or number < 1:
             return await smart_embed(ctx, _("Nice try :smirk:."))
         if self.in_adventure(ctx):
@@ -253,9 +258,14 @@ class LootCommands(AdventureMixin):
             parts=1,
         )
 
-    @commands.command()
+    @commands.hybrid_command(name="convert")
     @commands.cooldown(rate=1, per=4, type=commands.BucketType.guild)
-    async def convert(self, ctx: commands.Context, box_rarity: str, amount: int = 1):
+    async def convert(
+        self,
+        ctx: commands.Context,
+        box_rarity: Literal["normal", "rare", "epic", "legendary", "ascended", "set"],
+        amount: int = 1,
+    ):
         """Convert normal, rare or epic chests.
 
         Trade 25 normal chests for 1 rare chest.
@@ -505,6 +515,11 @@ class LootCommands(AdventureMixin):
             intel = item.int
             luck = item.luck
             dex = item.dex
+        if hasattr(user, "id"):
+            view = LootView(60, user)
+        else:
+            view = LootView(60, ctx.author)
+
         if hasattr(user, "display_name"):
             chest_msg2 = (
                 _("{user} found {item} [{slot}] | Lvl req {lv}.").format(
@@ -528,7 +543,8 @@ class LootCommands(AdventureMixin):
                         "{old_stats}"
                     ).format(c_msg=chest_msg, c_msg_2=chest_msg2, old_stats=old_stats),
                     lang="css",
-                )
+                ),
+                view=view,
             )
         else:
             chest_msg2 = (
@@ -548,17 +564,11 @@ class LootCommands(AdventureMixin):
                         "this item, put in your backpack, or sell this item?\n\n{old_stats}"
                     ).format(c_msg=chest_msg, c_msg_2=chest_msg2, old_stats=old_stats),
                     lang="css",
-                )
+                ),
+                view=view,
             )
-
-        start_adding_reactions(open_msg, self._treasure_controls.keys())
-        if hasattr(user, "id"):
-            pred = ReactionPredicate.with_emojis(tuple(self._treasure_controls.keys()), open_msg, user)
-        else:
-            pred = ReactionPredicate.with_emojis(tuple(self._treasure_controls.keys()), open_msg, ctx.author)
-        try:
-            react, user = await self.bot.wait_for("reaction_add", check=pred, timeout=60)
-        except asyncio.TimeoutError:
+        await view.wait()
+        if view.result.value == 0:
             await self._clear_react(open_msg)
             await character.add_to_backpack(item)
             await open_msg.edit(
@@ -569,12 +579,13 @@ class LootCommands(AdventureMixin):
                         ),
                         lang="css",
                     )
-                )
+                ),
+                view=None,
             )
             await self.config.user(ctx.author).set(await character.to_json(ctx, self.config))
             return
         await self._clear_react(open_msg)
-        if self._treasure_controls[react.emoji] == "sell":
+        if view.result.value == 2:
             price = _sell(character, item)
             price = max(price, 0)
             if price > 0:
@@ -598,13 +609,14 @@ class LootCommands(AdventureMixin):
                         ),
                         lang="css",
                     )
-                )
+                ),
+                view=None,
             )
             await self._clear_react(open_msg)
             character.last_known_currency = await bank.get_balance(ctx.author)
             character.last_currency_check = time.time()
             await self.config.user(ctx.author).set(await character.to_json(ctx, self.config))
-        elif self._treasure_controls[react.emoji] == "equip":
+        elif view.result.value == 1:
             equiplevel = character.equip_level(item)
             if is_dev(ctx.author):
                 equiplevel = 0
@@ -633,20 +645,6 @@ class LootCommands(AdventureMixin):
                     ),
                     lang="css",
                 )
-            await open_msg.edit(content=equip_msg)
+            await open_msg.edit(content=equip_msg, view=None)
             character = await character.equip_item(item, False, is_dev(ctx.author))
-            await self.config.user(ctx.author).set(await character.to_json(ctx, self.config))
-        else:
-            await character.add_to_backpack(item)
-            await open_msg.edit(
-                content=(
-                    box(
-                        _("{user} put the {item} into their backpack.").format(
-                            user=escape(ctx.author.display_name), item=item
-                        ),
-                        lang="css",
-                    )
-                )
-            )
-            await self._clear_react(open_msg)
             await self.config.user(ctx.author).set(await character.to_json(ctx, self.config))
