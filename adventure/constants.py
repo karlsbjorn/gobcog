@@ -43,6 +43,7 @@ class HeroClasses(Enum):
     bard = "bard"
     psychic = "psychic"
 
+DEV_LIST = (208903205982044161, 154497072148643840, 218773382617890828, 87446677010550784)
 
 ORDER = [
     "head",
