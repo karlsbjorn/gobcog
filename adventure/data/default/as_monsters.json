@@ -2906,5 +2906,235 @@
         "boss": false,
         "miniboss": {},
         "color": ""
+    },
+    "Ascended Shriekwing": {
+        "hp": 600,
+        "pdef": 1.1,
+        "mdef": 1.1,
+        "dipl": 600,
+        "image": "https://attackofthefanboy.com/wp-content/uploads/2020/12/wow-shadowlands-castle-nathria-shriekwing.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Huntsman Altimor": {
+        "hp": 625,
+        "pdef": 1,
+        "mdef": 0.8,
+        "dipl": 525,
+        "image": "https://assets.mythictrap.com/castleNathria/altimorBig.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Hungering Destroyer": {
+        "hp": 650,
+        "pdef": 0.8,
+        "mdef": 1.25,
+        "dipl": 700,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/9/90/Hungering_Destroyer.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Lady Inerva Darkvein": {
+        "hp": 675,
+        "pdef": 1.3,
+        "mdef": 0.8,
+        "dipl": 575,
+        "image": "https://pbs.twimg.com/media/EpVF0I8VQAAVzii.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Artificer Xy'Mox": {
+        "hp": 675,
+        "pdef": 1.1,
+        "mdef": 1.2,
+        "dipl": 750,
+        "image": "https://wow.zamimg.com/uploads/guide/seo/10382.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Council of Blood": {
+        "hp": 700,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 600,
+        "image": "https://assets.mythictrap.com/castleNathria/theCouncilOfBloodBig.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Sludgefist": {
+        "hp": 725,
+        "pdef": 1.5,
+        "mdef": 1,
+        "dipl": 800,
+        "image": "https://pbs.twimg.com/media/Eo_C0IZW4AEtPAF.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Stone Legion Generals": {
+        "hp": 750,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 825,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/1/1c/Stone_Legion_Generals.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Tarragrue": {
+        "hp": 625,
+        "pdef": 1,
+        "mdef": 0.75,
+        "dipl": 700,
+        "image": "https://i.pinimg.com/originals/79/df/e1/79dfe185056c1772382580bfba67764d.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Eye of the Jailer": {
+        "hp": 650,
+        "pdef": 0.8,
+        "mdef": 1,
+        "dipl": 725,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/8/8a/Eye_of_the_Jailer.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Soulrender Dormazain": {
+        "hp": 675,
+        "pdef": 1.05,
+        "mdef": 1,
+        "dipl": 700,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/0/0f/Soulrender_Dormazain.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Remnant of Ner'zhul": {
+        "hp": 675,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 725,
+        "image": "https://tanknotes.com/storage/uploads/2021/06/05/60bb7ae556111Remnant-of-Nerzhul.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Painsmith Raznal": {
+        "hp": 700,
+        "pdef": 1.3,
+        "mdef": 1,
+        "dipl": 750,
+        "image": "https://i.imgur.com/obc0wkG.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Fatescribe Roh-Kalo": {
+        "hp": 725,
+        "pdef": 1.3,
+        "mdef": 0.7,
+        "dipl": 875,
+        "image": "https://wow.zamimg.com/uploads/blog/images/23640.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Guardian of the First Ones": {
+        "hp": 725,
+        "pdef": 0.8,
+        "mdef": 1.1,
+        "dipl": 875,
+        "image": "https://blizzardwatch.com/wp-content/uploads/2021/07/sanctum.of_.domination.sod_.raid_.boss_.guardian.first_.ones_.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Vigilant Guardian": {
+        "hp": 625,
+        "pdef": 0.7,
+        "mdef": 0.7,
+        "dipl": 800,
+        "image": "https://i.imgur.com/gOkdFBi.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Skolex, the Insatiable Ravener": {
+        "hp": 650,
+        "pdef": 1.1,
+        "mdef": 1.1,
+        "dipl": 800,
+        "image": "https://i.imgur.com/wVFZiuO.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Dausegne, the Fallen Oracle": {
+        "hp": 650,
+        "pdef": 1.2,
+        "mdef": 0.8,
+        "dipl": 800,
+        "image": "https://i.imgur.com/wal3N4y.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Prototype Pantheon": {
+        "hp": 675,
+        "pdef": 0.7,
+        "mdef": 1.3,
+        "dipl": 900,
+        "image": "https://i.imgur.com/G46rEwH.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Lihuvim, Principal Architect": {
+        "hp": 700,
+        "pdef": 1.2,
+        "mdef": 1,
+        "dipl": 900,
+        "image": "https://i.imgur.com/BA9nRTm.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Halondrus the Reclaimer": {
+        "hp": 700,
+        "pdef": 1.25,
+        "mdef": 1.25,
+        "dipl": 900,
+        "image": "https://i.imgur.com/OrBbPj1.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Rygelon": {
+        "hp": 750,
+        "pdef": 0.9,
+        "mdef": 1.2,
+        "dipl": 750,
+        "image": "https://i.imgur.com/k8gqc3E.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Ascended Jailer": {
+        "hp": 800,
+        "pdef": 1.2,
+        "mdef": 1.2,
+        "dipl": 950,
+        "image": "https://i.imgur.com/eyB9pZZ.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
     }
 }
