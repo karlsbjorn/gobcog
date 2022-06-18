@@ -2912,5 +2912,235 @@
         "boss": false,
         "miniboss": {},
         "color": ""
+    },
+    "Shriekwing": {
+        "hp": 400,
+        "pdef": 1.1,
+        "mdef": 1.1,
+        "dipl": 500,
+        "image": "https://attackofthefanboy.com/wp-content/uploads/2020/12/wow-shadowlands-castle-nathria-shriekwing.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Huntsman Altimor": {
+        "hp": 425,
+        "pdef": 1,
+        "mdef": 0.8,
+        "dipl": 425,
+        "image": "https://assets.mythictrap.com/castleNathria/altimorBig.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Hungering Destroyer": {
+        "hp": 450,
+        "pdef": 0.8,
+        "mdef": 1.25,
+        "dipl": 700,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/9/90/Hungering_Destroyer.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Lady Inerva Darkvein": {
+        "hp": 475,
+        "pdef": 1.3,
+        "mdef": 0.8,
+        "dipl": 475,
+        "image": "https://pbs.twimg.com/media/EpVF0I8VQAAVzii.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Artificer Xy'Mox": {
+        "hp": 475,
+        "pdef": 1.1,
+        "mdef": 1.2,
+        "dipl": 550,
+        "image": "https://wow.zamimg.com/uploads/guide/seo/10382.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Council of Blood": {
+        "hp": 500,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 500,
+        "image": "https://assets.mythictrap.com/castleNathria/theCouncilOfBloodBig.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Sludgefist": {
+        "hp": 525,
+        "pdef": 1.5,
+        "mdef": 1,
+        "dipl": 700,
+        "image": "https://pbs.twimg.com/media/Eo_C0IZW4AEtPAF.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Stone Legion Generals": {
+        "hp": 550,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 725,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/1/1c/Stone_Legion_Generals.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Tarragrue": {
+        "hp": 425,
+        "pdef": 1,
+        "mdef": 0.75,
+        "dipl": 600,
+        "image": "https://i.pinimg.com/originals/79/df/e1/79dfe185056c1772382580bfba67764d.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Eye of the Jailer": {
+        "hp": 450,
+        "pdef": 0.8,
+        "mdef": 1,
+        "dipl": 625,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/8/8a/Eye_of_the_Jailer.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Soulrender Dormazain": {
+        "hp": 475,
+        "pdef": 1.05,
+        "mdef": 1,
+        "dipl": 600,
+        "image": "https://static.wikia.nocookie.net/wowpedia/images/0/0f/Soulrender_Dormazain.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Remnant of Ner'zhul": {
+        "hp": 475,
+        "pdef": 1.2,
+        "mdef": 0.9,
+        "dipl": 625,
+        "image": "https://tanknotes.com/storage/uploads/2021/06/05/60bb7ae556111Remnant-of-Nerzhul.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Painsmith Raznal": {
+        "hp": 500,
+        "pdef": 1.3,
+        "mdef": 1,
+        "dipl": 650,
+        "image": "https://i.imgur.com/obc0wkG.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Fatescribe Roh-Kalo": {
+        "hp": 525,
+        "pdef": 1.3,
+        "mdef": 0.7,
+        "dipl": 675,
+        "image": "https://wow.zamimg.com/uploads/blog/images/23640.jpg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Guardian of the First Ones": {
+        "hp": 525,
+        "pdef": 0.8,
+        "mdef": 1.1,
+        "dipl": 675,
+        "image": "https://blizzardwatch.com/wp-content/uploads/2021/07/sanctum.of_.domination.sod_.raid_.boss_.guardian.first_.ones_.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Vigilant Guardian": {
+        "hp": 425,
+        "pdef": 0.7,
+        "mdef": 0.7,
+        "dipl": 500,
+        "image": "https://i.imgur.com/gOkdFBi.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Skolex, the Insatiable Ravener": {
+        "hp": 450,
+        "pdef": 1.1,
+        "mdef": 1.1,
+        "dipl": 600,
+        "image": "https://i.imgur.com/wVFZiuO.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Dausegne, the Fallen Oracle": {
+        "hp": 450,
+        "pdef": 1.2,
+        "mdef": 0.8,
+        "dipl": 600,
+        "image": "https://i.imgur.com/wal3N4y.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Prototype Pantheon": {
+        "hp": 475,
+        "pdef": 0.7,
+        "mdef": 1.3,
+        "dipl": 700,
+        "image": "https://i.imgur.com/G46rEwH.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Lihuvim, Principal Architect": {
+        "hp": 500,
+        "pdef": 1.2,
+        "mdef": 1,
+        "dipl": 700,
+        "image": "https://i.imgur.com/BA9nRTm.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Halondrus the Reclaimer": {
+        "hp": 500,
+        "pdef": 1.25,
+        "mdef": 1.25,
+        "dipl": 700,
+        "image": "https://i.imgur.com/OrBbPj1.png",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Rygelon": {
+        "hp": 550,
+        "pdef": 0.9,
+        "mdef": 1.2,
+        "dipl": 550,
+        "image": "https://i.imgur.com/k8gqc3E.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
+    },
+    "Jailer": {
+        "hp": 600,
+        "pdef": 1.2,
+        "mdef": 1.2,
+        "dipl": 750,
+        "image": "https://i.imgur.com/eyB9pZZ.jpeg",
+        "boss": true,
+        "miniboss": {},
+        "color": ""
     }
 }
