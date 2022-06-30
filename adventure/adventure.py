@@ -93,7 +93,7 @@ class Adventure(
             user_id
         ).clear()  # This will only ever touch the separate currency, leaving bot economy to be handled by core.
 
-    __version__ = "3.5.3"
+    __version__ = "3.5.4"
 
     def __init__(self, bot: Red):
         self.bot = bot
@@ -847,12 +847,11 @@ class Adventure(
             attribute = attribute.lower()
         else:
             attribute = random.choice(list(self.ATTRIBS.keys()))
-        if transcended:
-            new_challenge = challenge.replace("Ascended", "Transcended")
-        else:
-            new_challenge = challenge
-
+        new_challenge = challenge
         if easy_mode:
+            if transcended:
+                # Shows Transcended on Easy mode
+                new_challenge = _("Transcended {}").format(challenge.replace("Ascended", ""))
             no_monster = False
             if monster_roster[challenge]["boss"]:
                 timer = 60 * 5
@@ -863,7 +862,7 @@ class Adventure(
                 self.bot.dispatch("adventure_miniboss", ctx)
             else:
                 timer = 60 * 2
-            if "Transcended" in new_challenge:
+            if transcended:
                 self.bot.dispatch("adventure_transcended", ctx)
             elif "Ascended" in new_challenge:
                 self.bot.dispatch("adventure_ascended", ctx)
@@ -872,6 +871,9 @@ class Adventure(
             elif attribute == " possessed":
                 self.bot.dispatch("adventure_possessed", ctx)
         else:
+            if transcended:
+                # Hide Transcended on Easy mode
+                new_challenge = challenge.replace("Ascended", "")
             timer = 60 * 3
             no_monster = random.randint(0, 100) == 25
         self._sessions[ctx.guild.id] = GameSession(
@@ -1258,8 +1260,12 @@ class Adventure(
         )
         result_msg = run_msg + pray_msg + talk_msg + fight_msg
         challenge_attrib = session.attribute
-        hp = int(session.monster_modified_stats["hp"] * self.ATTRIBS[challenge_attrib][0] * session.monster_stats)
-        dipl = int(session.monster_modified_stats["dipl"] * self.ATTRIBS[challenge_attrib][1] * session.monster_stats)
+        hp = max(
+            int(session.monster_modified_stats["hp"] * self.ATTRIBS[challenge_attrib][0] * session.monster_stats), 1
+        )
+        dipl = max(
+            int(session.monster_modified_stats["dipl"] * self.ATTRIBS[challenge_attrib][1] * session.monster_stats), 1
+        )
 
         dmg_dealt = int(attack + magic)
         diplomacy = int(diplomacy)
@@ -1323,7 +1329,7 @@ class Adventure(
                 roll = random.randint(1, 10)
                 monster_amount = hp + dipl if slain and persuaded else hp if slain else dipl
                 if session.transcended:
-                    if session.boss and "Trancended" in session.challenge:
+                    if session.boss and not session.no_monster:
                         avaliable_loot = [
                             [0, 0, 1, 5, 2, 1],
                             [0, 0, 0, 0, 1, 1],
@@ -1375,7 +1381,7 @@ class Adventure(
                 roll = random.randint(1, 10)
                 monster_amount = hp + dipl if slain and persuaded else hp if slain else dipl
                 if session.transcended:
-                    if session.boss and "Trancended" in session.challenge:
+                    if session.boss and not session.no_monster:
                         avaliable_loot = [
                             [0, 0, 1, 5, 4, 2],
                             [0, 0, 3, 4, 5, 2],
