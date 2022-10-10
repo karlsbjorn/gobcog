@@ -2568,12 +2568,14 @@ class Adventure(
                 newcp += petcp
                 usercp += petcp
                 self._rewards[user.id]["cp"] = usercp
+                reward_message += "{mention} je dobio {xp} XP-a i {coin} {currency}.\n".format(
                     mention=user.mention if can_embed else f"**{user.display_name}**",
                     xp=humanize_number(int(userxp)),
                     coin=humanize_number(int(usercp)),
                     currency=currency_name,
                 )
                 percent = round((c.heroclass["pet"]["bonus"] - 1.0) * 100)
+                phrase += _("\n**{user}** je dobio **{percent}%** nagradnog bonusa od svog {pet_name}.").format(
                     user=escape(user.display_name),
                     percent=str(percent),
                     pet_name=c.heroclass["pet"]["name"],
