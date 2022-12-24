@@ -996,7 +996,7 @@ class Adventure(
         session.message_id = adventure_msg.id
         session.message = adventure_msg
         # start_adding_reactions(adventure_msg, self._adventure_actions)
-        timer = await self._adv_countdown(ctx, session.timer, "Preostalo vrijeme")
+        timer = await self._adv_countdown(ctx, session.timer, "Avantura završava")
         self.tasks[adventure_msg.id] = timer
         try:
             await asyncio.wait_for(timer, timeout=timeout + 5)
