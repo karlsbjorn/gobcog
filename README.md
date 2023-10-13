@@ -1,6 +1,6 @@
 # Adventure
 
-In this RPG cog originally by locastan - TrustyJAID, Draper, and aikaterna have crafted a fun idle game you can play with the members of your servers.
+In this RPG cog originally by locastan - TrustyJAID, Draper, and myself have crafted a fun idle game you can play with the members of your servers.
 
 ### >>> This branch is compatible with Red 3.5, and not 3.4.x <<<
 
@@ -16,7 +16,7 @@ To start an adventure, use `[p]adventure` or `[p]a`. Reactions will appear under
 
 ## Hero/Heroclass
 
-Classes can be chosen at level 10 by using `[p]heroclass`. Available classes are Tinkerer, Berserker, Wizard, Cleric, Ranger, Bard and Druid. A prestige class called Psychic is available at Rebirth level 20 (more on the rebirthing system below).  
+Classes can be chosen at level 10 by using `[p]heroclass`. Available classes are Tinkerer, Berserker, Wizard, Cleric, Ranger and Bard. A prestige class called Psychic is available at Rebirth level 20 (more on the rebirthing system below).  
   
 Main Stats: Attack (ATT/ATK), Charisma/Diplomacy (CHA/DIPL), Intelligence (INT)  
 Minor Stats: Dexterity (DEX), Luck (LUCK/LUK)  
@@ -62,11 +62,6 @@ Rebirth levels can buff the base value of the bard's attack.
 Use the `[p]insight` command in an adventure.  
 * A successful insight into an enemy's weak points during an adventure can turn the tide on difficult encounters.  
 Preferred stat: INT  
-
-**Druids** can unleash nature's raw energy against their foes allowing them to quickly cast a flurry of spells.  
-Use the `[p]convoke` command when attacking in an adventure.
-* Causes a random amount of Int-based/Magic-based damage.  
-Preferred stat: INT
 
 
 ## Basic Commands for Players

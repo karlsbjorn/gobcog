@@ -259,7 +259,6 @@ class Negaverse(AdventureMixin):
                     lock.release()
                 msg = await self._add_rewards(ctx, ctx.author, xp_won, offering, Treasure())
                 xp_won_final += xp_won
-
                 offering_value += offering
                 winning_state = True
                 if msg:
