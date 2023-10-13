@@ -172,6 +172,11 @@
       "dex": -2,
       "int": 2,
       "luck": 2
+    },
+    "Pistol": {
+      "att": 2,
+      "int": 1,
+      "luck": 1
     }
   },
   "legs": {
