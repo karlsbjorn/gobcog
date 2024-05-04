@@ -2448,7 +2448,7 @@ class Adventure(
                 log.exception("Error with the new character sheet", exc_info=exc)
                 return
             rebirth_text = ""
-            c.exp += (exp * 5)
+            c.exp += exp
             member = ctx.guild.get_member(user.id)
             cp = max(cp, 0)
             if cp > 0:
@@ -2677,7 +2677,7 @@ class Adventure(
             usercp = int(cp + max((cp * 0.1 * min(1000, (c._luck + c._att) / 10)), 0))
             userxp = int(userxp * (c.gear_set_bonus.get("xpmult", 1) + daymult + session_bonus))
             usercp = int(usercp * (c.gear_set_bonus.get("cpmult", 1) + daymult))
-            newxp += userxp
+            newxp += userxp * 5
             newcp += usercp
             roll = random.randint(1, 5)
             if c.heroclass.get("pet", {}).get("bonuses", {}).get("always", False):
