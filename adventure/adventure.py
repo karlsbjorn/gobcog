@@ -2448,7 +2448,7 @@ class Adventure(
                 log.exception("Error with the new character sheet", exc_info=exc)
                 return
             rebirth_text = ""
-            c.exp += exp
+            c.exp += (exp * 5)
             member = ctx.guild.get_member(user.id)
             cp = max(cp, 0)
             if cp > 0:
